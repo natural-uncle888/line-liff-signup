@@ -76,12 +76,14 @@ function pickHHMM(value){
 }
 
 function formatSegmentTime(seg){
-  const date = pickDateYYYYMMDD(seg.date);
+  const d1 = pickDateYYYYMMDD(seg.date);
+  const d2 = pickDateYYYYMMDD(seg.endDate);
+  const datePart = (d1 && d2 && d2 !== d1) ? `${d1}~${d2}` : d1;
   const st = pickHHMM(seg.startTime);
   const et = pickHHMM(seg.endTime);
   const t = [st, et].filter(Boolean).join("–");
-  if (date && t) return `${date} ${t}`;
-  if (date) return date;
+  if (datePart && t) return `${datePart} ${t}`;
+  if (datePart) return datePart;
   if (t) return t;
   return "";
 }
