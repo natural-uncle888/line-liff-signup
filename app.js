@@ -27,11 +27,19 @@ async function apiGet(params){
 }
 
 async function apiPost(payload){
+  const form = new URLSearchParams();
+  Object.entries(payload).forEach(([k,v])=>{
+    if (v === undefined || v === null) return;
+    // 物件/陣列用 JSON 字串傳
+    form.set(k, typeof v === "object" ? JSON.stringify(v) : String(v));
+  });
+
   const res = await fetch(APP_CONFIG.API_BASE, {
     method:"POST",
-    headers: { "Content-Type":"application/json" },
-    body: JSON.stringify(payload)
+    headers: { "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" },
+    body: form.toString()
   });
+
   const data = await res.json();
   if (!data.ok) throw new Error(data.error || "API error");
   return data;
