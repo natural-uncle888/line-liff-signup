@@ -104,7 +104,10 @@
           <hr class="my-4"/>
 
           <div class="d-flex align-items-center justify-content-between">
-            <h6 class="mb-0">目前參加狀況</h6>
+            <div class="d-flex align-items-center gap-2">
+              <h6 class="mb-0">目前參加狀況</h6>
+              <span id="regsSpinner" class="spinner-border spinner-border-sm text-secondary" role="status" aria-label="loading" style="display:none"></span>
+            </div>
             <button class="btn btn-sm btn-outline-secondary" id="btnRefresh" disabled>重新整理</button>
           </div>
 
@@ -157,14 +160,37 @@ let USER = null;
 let CURRENT_EVENT = null;
 let CURRENT_SEGMENTS = [];
 let CURRENT_REG = null;
+let LOADED_REGS = {}; // eventId -> true when registrations loaded once
+
 
 function renderEvents(events){
   const list = document.getElementById("eventsList");
   list.innerHTML = "";
+
+  // Skeleton state: pass null/undefined to render placeholders
+  if (!events){
+    for (let i=0; i<6; i++){
+      const sk = document.createElement("div");
+      sk.className = "list-group-item";
+      sk.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+          <div style="width:78%">
+            <div class="skeleton" style="height:14px; width:70%;"></div>
+            <div class="skeleton mt-2" style="height:12px; width:55%;"></div>
+          </div>
+          <div class="skeleton" style="height:20px; width:60px; border-radius:999px;"></div>
+        </div>
+      `;
+      list.appendChild(sk);
+    }
+    return;
+  }
+
   if (!events.length){
     list.innerHTML = `<div class="small-muted">目前沒有活動</div>`;
     return;
   }
+
   events.forEach(ev=>{
     const a = document.createElement("button");
     a.type = "button";
@@ -284,14 +310,25 @@ function renderParticipants(regs, segments){
 
 async function refreshStats(){
   if (!CURRENT_EVENT) return;
-  setLoading(true, "載入報名名單…");
+  const eventId = CURRENT_EVENT.eventId;
+  const firstTime = !LOADED_REGS[eventId];
+
+  const sp = document.getElementById("regsSpinner");
+  if (firstTime){
+    setLoading(true, "載入報名名單…");
+  }else{
+    if (sp) sp.style.display = "inline-block";
+  }
+
   try{
-    const data = await apiGet({ action:"listRegistrations", eventId: CURRENT_EVENT.eventId });
+    const data = await apiGet({ action:"listRegistrations", eventId });
     const regs = data.registrations || [];
     renderCounts(CURRENT_SEGMENTS, regs);
     renderParticipants(regs, CURRENT_SEGMENTS);
+    LOADED_REGS[eventId] = true;
   }finally{
-    setLoading(false);
+    if (firstTime) setLoading(false);
+    if (sp) sp.style.display = "none";
   }
 }
 
@@ -333,12 +370,14 @@ async function loadEvents(){
     toast("請先在 config.js 填好 API_BASE / LIFF_ID", "error");
     return;
   }
-  setLoading(true, "載入活動列表…");
+  // 先顯示骨架屏，體感更快
+  renderEvents(null);
   try{
     const data = await apiGet({ action:"listEvents" });
     renderEvents(data.events || []);
-  }finally{
-    setLoading(false);
+  }catch(e){
+    toast(e.message, "error");
+    renderEvents([]);
   }
 }
 
