@@ -23,7 +23,7 @@
       <div class="card shadow-sm">
         <div class="card-body">
           <h5 class="card-title mb-1">建立活動</h5>
-          <div class="small-muted mb-3">先填活動主檔，再一段一段新增行程分段</div>
+          <div class="small-muted mb-3">先填活動主檔，再一段一段新增行程清單</div>
 
           <div class="mb-3">
             <label class="form-label">管理密碼（ADMIN TOKEN）</label>
@@ -41,7 +41,7 @@
           </div>
 
           <div class="d-flex align-items-center justify-content-between">
-            <h6 class="mb-2">行程分段</h6>
+            <h6 class="mb-2">行程清單</h6>
             <button class="btn btn-sm btn-outline-primary" id="btnAddSeg">＋ 新增一段</button>
           </div>
 
@@ -88,7 +88,7 @@ function segTemplate(data={}){
   wrap.innerHTML = `
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center">
-        <div class="fw-semibold">段落 #${segCounter}</div>
+        <div class="fw-semibold">行程 #${segCounter}</div>
         <button type="button" class="btn btn-sm btn-outline-danger">刪除</button>
       </div>
       <div class="row g-2 mt-2">

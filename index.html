@@ -42,7 +42,7 @@
               <div class="small-muted" id="eventDesc"></div>
             </div>
             <div class="text-end">
-              <button class="btn btn-sm btn-outline-primary" id="btnShare" disabled>在 LINE 分享此活動</button>
+              <button class="btn btn-sm btn-outline-primary" id="btnShare" disabled>複製報名網址</button>
             </div>
           </div>
 
@@ -83,7 +83,7 @@
 
           <hr class="my-4"/>
 
-          <h6 class="mb-2">行程分段（可選段落）</h6>
+          <h6 class="mb-2">行程清單（可選參加）</h6>
           <div id="segmentsWrap" class="vstack gap-2"></div>
 
           <hr class="my-4"/>
@@ -197,7 +197,7 @@ function renderSegments(segments, selectedSegmentIds){
             <div class="seg-title">${escapeHtml(seg.location)}</div>
             <div class="seg-meta mt-1">
               ${time ? `<span class="badge text-bg-light border mono">${escapeHtml(time)}</span>` : ""}
-              <span class="badge text-bg-light border">段落 ${seg.order}</span>
+              <span class="badge text-bg-light border">行程 ${seg.order}</span>
             </div>
             ${seg.highlights ? `<div class="segment-highlight small-muted mt-2">${escapeHtml(seg.highlights)}</div>` : ""}
           </div>
@@ -237,7 +237,7 @@ function renderCounts(segments, regs){
   segments.forEach(s=>{
     const b = document.createElement("span");
     b.className = "badge text-bg-light border";
-    b.textContent = `段落 ${s.order}: ${counts[s.segmentId] || 0} 組`;
+    b.textContent = `行程 ${s.order}: ${counts[s.segmentId] || 0} 組`;
     wrap.appendChild(b);
   });
 }
@@ -260,7 +260,7 @@ function renderParticipants(regs, segments){
       <div class="fw-semibold">${escapeHtml(r.displayName || "（未命名）")}</div>
       <div class="text-end">
         <div class="small-muted">人數：${people}</div>
-        <div class="small-muted">段落：${segOrders.length ? segOrders.join(", ") : "—"}</div>
+        <div class="small-muted">行程：${segOrders.length ? segOrders.join(", ") : "—"}</div>
       </div>
     `;
     wrap.appendChild(el);
@@ -299,7 +299,7 @@ async function loadEvent(eventId){
     document.getElementById("btnNone").disabled = !isOpen;
     document.getElementById("btnSubmit").disabled = !isOpen;
     document.getElementById("btnRefresh").disabled = false;
-    document.getElementById("btnShare").disabled = !(USER && USER.liffReady);
+    document.getElementById("btnShare").disabled = false;
 
     await refreshStats();
   }catch(e){
@@ -340,19 +340,39 @@ async function submitRegistration(){
   await loadEvent(CURRENT_EVENT.eventId);
 }
 
-async function shareEvent(){
+async function copyEventLink(){
   if (!CURRENT_EVENT) return;
-  if (!USER || !USER.liffReady) return;
   const url = window.location.origin + window.location.pathname + "?eventId=" + encodeURIComponent(CURRENT_EVENT.eventId);
-  const text = `📌 ${CURRENT_EVENT.title}\n${CURRENT_EVENT.description || ""}\n\n點此報名（可選段落）：\n${url}`;
-  await liff.shareTargetPicker([{ type:"text", text }]);
+
+  try{
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(url);
+      toast("已複製報名網址 ✅", "success");
+    }else{
+      // Fallback for older browsers / non-secure context
+      window.prompt("複製這個報名網址：", url);
+    }
+  }catch(e){
+    // Some browsers block clipboard unless user gesture / permissions
+    window.prompt("複製這個報名網址：", url);
+  }
+}
+${CURRENT_EVENT.description || ""}
+
+報名連結：
+${url}`;
+
+  // shareTargetPicker: 取消分享時通常會回傳 null/undefined
+  const res = await liff.shareTargetPicker([{ type:"text", text }]);
+  if (res) toast("已送出分享 ✅", "success");
+  else toast("已取消分享", "info");
 }
 
 document.getElementById("btnAll").onclick = ()=> setAllSegments(true);
 document.getElementById("btnNone").onclick = ()=> setAllSegments(false);
 document.getElementById("btnSubmit").onclick = ()=> submitRegistration().catch(e=>toast(e.message,"error"));
 document.getElementById("btnRefresh").onclick = ()=> refreshStats().catch(e=>toast(e.message,"error"));
-document.getElementById("btnShare").onclick = ()=> shareEvent().catch(()=>toast("分享已取消或失敗","error"));
+document.getElementById("btnShare").onclick = ()=> shareEvent().catch(e=>toast("分享失敗：" + (e?.message || ""), "error"));
 
 (async ()=>{
   USER = await initLiffIfAvailable();
