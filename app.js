@@ -142,13 +142,36 @@ function setLoading(on, text){
   const txt = document.getElementById("loadingText");
   if (!el) return;
 
+  // auto-close safety timer: prevent overlay from getting stuck
+  if (typeof window.__loadingTimer === "undefined") window.__loadingTimer = null;
+
   if (on){
     __loadingCount += 1;
     if (text && txt) txt.textContent = text;
     el.style.display = "block";
+
+    // (re)start safety timer
+    if (window.__loadingTimer) clearTimeout(window.__loadingTimer);
+    window.__loadingTimer = setTimeout(()=>{
+      __loadingCount = 0;
+      el.style.display = "none";
+      if (window.__loadingTimer) { clearTimeout(window.__loadingTimer); window.__loadingTimer = null; }
+      // optional: soft hint
+      const t = document.getElementById("toast");
+      if (t){
+        t.className = "alert alert-warning";
+        t.style.display = "block";
+        t.textContent = "載入時間較長，已自動關閉提示（可再試一次或稍後重整）";
+        setTimeout(()=>{ t.style.display="none"; }, 3500);
+      }
+    }, 10000);
+
   } else {
     __loadingCount = Math.max(0, __loadingCount - 1);
-    if (__loadingCount === 0) el.style.display = "none";
+    if (__loadingCount === 0){
+      el.style.display = "none";
+      if (window.__loadingTimer) { clearTimeout(window.__loadingTimer); window.__loadingTimer = null; }
+    }
   }
 }
 
