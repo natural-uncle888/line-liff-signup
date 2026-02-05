@@ -169,6 +169,7 @@ let CURRENT_EVENT = null;
 let CURRENT_SEGMENTS = [];
 let CURRENT_REG = null;
 let LOADED_REGS = {}; // eventId -> true when registrations loaded once
+let PRELOAD_LOADING = false; // used to show loading immediately on click
 
 
 function renderEvents(events){
@@ -210,7 +211,7 @@ function renderEvents(events){
       </div>
       <span class="badge text-bg-${ev.status === "OPEN" ? "success" : "secondary"}">${ev.status}</span>
     `;
-    a.onclick = ()=> { setLoading(true, "載入活動內容…"); setTimeout(()=>loadEvent(ev.eventId), 0); };
+    a.onclick = ()=> { PRELOAD_LOADING = true; setLoading(true, "載入活動內容…"); setTimeout(()=>loadEvent(ev.eventId), 0); };
     list.appendChild(a);
   });
 }
@@ -419,7 +420,8 @@ async function submitRegistration(){
     toast("已更新報名 ✅", "success");
     await loadEvent(CURRENT_EVENT.eventId);
   }finally{
-    if (started) setLoading(false);
+    setLoading(false);
+    PRELOAD_LOADING = false;
   }
 }
 
