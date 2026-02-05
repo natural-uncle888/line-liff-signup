@@ -21,16 +21,14 @@
 <div class="container py-3">
   <div id="toast" class="alert alert-info" style="display:none"></div>
 
-  <div class="row g-3">
+  <div class="row g-3 align-items-start">
     <div class="col-lg-4">
       <div class="card shadow-sm">
         <div class="card-body">
           <h5 class="card-title mb-2">活動列表</h5>
           <div class="small-muted mb-3">選一個活動開始報名（可選段落）</div>
           <div id="eventsList" class="list-group"></div>
-          <div class="small-muted mt-3">
-            若你在 LINE 裡開啟，會自動帶入姓名並顯示名單（提升跟風意願）。
-          </div>
+          <div class="small-muted mt-3">提示：在 LINE 內開啟會自動帶入姓名並顯示名單（更有「跟風」效果）。</div>
         </div>
       </div>
     </div>
@@ -40,7 +38,7 @@
         <div class="card-body">
           <div class="d-flex align-items-start justify-content-between gap-3">
             <div>
-              <h5 class="card-title mb-1" id="eventTitle">請先選擇活動</h5>
+              <h4 class="card-title mb-1" id="eventTitle">請先選擇活動</h4>
               <div class="small-muted" id="eventDesc"></div>
             </div>
             <div class="text-end">
@@ -48,16 +46,44 @@
             </div>
           </div>
 
-          <hr/>
+          <div id="eventStatus" class="mt-3"></div>
 
-          <div id="eventStatus" class="mb-3"></div>
+          <div class="row g-2 mt-2">
+            <div class="col-md-6">
+              <div class="kpi p-3">
+                <div class="small-muted">你這次要報名的人數</div>
+                <div class="row g-2 mt-1">
+                  <div class="col-6">
+                    <label class="form-label mb-1">幾大</label>
+                    <input id="adults" type="number" min="0" max="20" class="form-control" placeholder="例如 2">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label mb-1">幾小</label>
+                    <input id="kids" type="number" min="0" max="20" class="form-control" placeholder="例如 1">
+                  </div>
+                </div>
+                <div class="form-text">只影響你這筆報名的統計與顯示。</div>
+              </div>
+            </div>
 
-          <div class="d-flex flex-wrap gap-2 mb-3">
-            <button class="btn btn-success" id="btnAll" disabled>✅ 全程參加</button>
-            <button class="btn btn-outline-secondary" id="btnNone" disabled>↩︎ 取消全程</button>
-            <button class="btn btn-primary" id="btnSubmit" disabled>送出 / 更新報名</button>
+            <div class="col-md-6">
+              <div class="kpi p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <div class="small-muted">快速操作</div>
+                  <div class="d-flex flex-wrap gap-2 mt-2">
+                    <button class="btn btn-success" id="btnAll" disabled>✅ 全程參加</button>
+                    <button class="btn btn-outline-secondary" id="btnNone" disabled>↩︎ 取消全程</button>
+                    <button class="btn btn-primary" id="btnSubmit" disabled>送出 / 更新報名</button>
+                  </div>
+                </div>
+                <div class="small-muted mt-2">結單後仍可查看名單，但不能再更新報名。</div>
+              </div>
+            </div>
           </div>
 
+          <hr class="my-4"/>
+
+          <h6 class="mb-2">行程分段（可選段落）</h6>
           <div id="segmentsWrap" class="vstack gap-2"></div>
 
           <hr class="my-4"/>
@@ -67,35 +93,41 @@
             <button class="btn btn-sm btn-outline-secondary" id="btnRefresh" disabled>重新整理</button>
           </div>
 
-          <div class="row g-2 mt-1">
+          <div class="row g-2 mt-2">
             <div class="col-md-4">
-              <div class="card">
-                <div class="card-body">
-                  <div class="small-muted">總參加人數（至少一段）</div>
-                  <div class="fs-3 fw-bold" id="totalPeople">—</div>
-                </div>
+              <div class="kpi p-3">
+                <div class="small-muted">組數（至少一段）</div>
+                <div class="value" id="totalGroups">—</div>
               </div>
             </div>
-            <div class="col-md-8">
-              <div class="card">
-                <div class="card-body">
-                  <div class="small-muted mb-2">每段人數</div>
-                  <div id="perSegmentCounts" class="d-flex flex-wrap gap-2"></div>
-                </div>
+            <div class="col-md-4">
+              <div class="kpi p-3">
+                <div class="small-muted">大人總數</div>
+                <div class="value" id="totalAdults">—</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kpi p-3">
+                <div class="small-muted">小孩總數</div>
+                <div class="value" id="totalKids">—</div>
               </div>
             </div>
           </div>
 
           <div class="card mt-2">
             <div class="card-body">
-              <div class="small-muted mb-2">名單（可增加「看到誰去」的參加動機）</div>
+              <div class="small-muted mb-2">每段人數</div>
+              <div id="perSegmentCounts" class="d-flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+
+          <div class="card mt-2">
+            <div class="card-body">
+              <div class="small-muted mb-2">名單</div>
               <div id="participants" class="vstack gap-2"></div>
             </div>
           </div>
 
-          <div class="small-muted mt-3">
-            提醒：結單後仍可查看名單，但不能再更新報名。
-          </div>
         </div>
       </div>
     </div>
@@ -110,13 +142,6 @@ let USER = null;
 let CURRENT_EVENT = null;
 let CURRENT_SEGMENTS = [];
 let CURRENT_REG = null;
-
-function setDisabledAll(disabled){
-  ["btnAll","btnNone","btnSubmit","btnRefresh","btnShare"].forEach(id=>{
-    const el = document.getElementById(id);
-    if (el) el.disabled = disabled;
-  });
-}
 
 function renderEvents(events){
   const list = document.getElementById("eventsList");
@@ -144,10 +169,10 @@ function renderEvents(events){
 function renderEventHeader(ev){
   document.getElementById("eventTitle").textContent = ev.title;
   document.getElementById("eventDesc").textContent = ev.description || "";
-  const st = ev.status === "OPEN"
-    ? `<div class="alert alert-success mb-0">🟢 報名中（OPEN）</div>`
-    : `<div class="alert alert-secondary mb-0">⚪ 已結單（CLOSED）</div>`;
-  document.getElementById("eventStatus").innerHTML = st;
+  document.getElementById("eventStatus").innerHTML =
+    ev.status === "OPEN"
+      ? `<div class="alert alert-success mb-0">🟢 報名中（OPEN）</div>`
+      : `<div class="alert alert-secondary mb-0">⚪ 已結單（CLOSED）</div>`;
 }
 
 function renderSegments(segments, selectedSegmentIds){
@@ -161,16 +186,16 @@ function renderSegments(segments, selectedSegmentIds){
     const checked = selectedSegmentIds.includes(seg.segmentId) ? "checked" : "";
     const time = formatSegmentTime(seg);
     const el = document.createElement("div");
-    el.className = "card";
+    el.className = "card seg-card";
     el.innerHTML = `
       <div class="card-body">
         <div class="d-flex align-items-start gap-3">
           <div class="form-check mt-1">
-            <input class="form-check-input seg-check" type="checkbox" id="seg_${seg.segmentId}" data-segid="${seg.segmentId}" ${checked}>
+            <input class="form-check-input seg-check" type="checkbox" data-segid="${seg.segmentId}" ${checked}>
           </div>
           <div class="flex-grow-1">
-            <div class="d-flex flex-wrap align-items-center gap-2">
-              <div class="fw-semibold">${escapeHtml(seg.location)}</div>
+            <div class="seg-title">${escapeHtml(seg.location)}</div>
+            <div class="seg-meta mt-1">
               ${time ? `<span class="badge text-bg-light border mono">${escapeHtml(time)}</span>` : ""}
               <span class="badge text-bg-light border">段落 ${seg.order}</span>
             </div>
@@ -192,11 +217,14 @@ function setAllSegments(value){
 }
 
 function renderCounts(segments, regs){
-  // total unique people
-  const total = regs.length;
-  document.getElementById("totalPeople").textContent = String(total);
+  const groups = regs.length;
+  const adultsTotal = regs.reduce((s,r)=> s + (Number(r.adults)||0), 0);
+  const kidsTotal = regs.reduce((s,r)=> s + (Number(r.kids)||0), 0);
 
-  // per segment counts
+  document.getElementById("totalGroups").textContent = String(groups);
+  document.getElementById("totalAdults").textContent = String(adultsTotal);
+  document.getElementById("totalKids").textContent = String(kidsTotal);
+
   const counts = {};
   segments.forEach(s=> counts[s.segmentId] = 0);
   regs.forEach(r=>{
@@ -209,7 +237,7 @@ function renderCounts(segments, regs){
   segments.forEach(s=>{
     const b = document.createElement("span");
     b.className = "badge text-bg-light border";
-    b.textContent = `段落 ${s.order}: ${counts[s.segmentId] || 0} 人`;
+    b.textContent = `段落 ${s.order}: ${counts[s.segmentId] || 0} 組`;
     wrap.appendChild(b);
   });
 }
@@ -227,9 +255,13 @@ function renderParticipants(regs, segments){
     const segOrders = (r.segments || []).map(id=>segMap[id]).filter(Boolean).sort((a,b)=>a-b);
     const el = document.createElement("div");
     el.className = "d-flex justify-content-between align-items-center border rounded-3 p-2 bg-white";
+    const people = `大${Number(r.adults)||0}・小${Number(r.kids)||0}`;
     el.innerHTML = `
       <div class="fw-semibold">${escapeHtml(r.displayName || "（未命名）")}</div>
-      <div class="small-muted">參加段落：${segOrders.length ? segOrders.join(", ") : "—"}</div>
+      <div class="text-end">
+        <div class="small-muted">人數：${people}</div>
+        <div class="small-muted">段落：${segOrders.length ? segOrders.join(", ") : "—"}</div>
+      </div>
     `;
     wrap.appendChild(el);
   });
@@ -248,17 +280,20 @@ async function loadEvent(eventId){
     toast("請先在 config.js 填好 API_BASE / LIFF_ID", "error");
     return;
   }
-  setDisabledAll(true);
   try{
-    const data = await apiGet({ action:"getEvent", eventId });
+    const data = await apiGet({ action:"getEvent", eventId, userId: (USER&&USER.userId)?USER.userId:"" });
     CURRENT_EVENT = data.event;
     CURRENT_SEGMENTS = data.segments || [];
     CURRENT_REG = data.registration || null;
+
     renderEventHeader(CURRENT_EVENT);
+
     const selected = CURRENT_REG ? (CURRENT_REG.segments || []) : [];
     renderSegments(CURRENT_SEGMENTS, selected);
 
-    // enable buttons
+    document.getElementById("adults").value = CURRENT_REG ? (CURRENT_REG.adults ?? "") : "";
+    document.getElementById("kids").value = CURRENT_REG ? (CURRENT_REG.kids ?? "") : "";
+
     const isOpen = CURRENT_EVENT.status === "OPEN";
     document.getElementById("btnAll").disabled = !isOpen;
     document.getElementById("btnNone").disabled = !isOpen;
@@ -270,14 +305,6 @@ async function loadEvent(eventId){
   }catch(e){
     console.error(e);
     toast(e.message, "error");
-  }finally{
-    setDisabledAll(false);
-    // but respect closed state
-    if (CURRENT_EVENT && CURRENT_EVENT.status !== "OPEN"){
-      document.getElementById("btnAll").disabled = true;
-      document.getElementById("btnNone").disabled = true;
-      document.getElementById("btnSubmit").disabled = true;
-    }
   }
 }
 
@@ -286,13 +313,8 @@ async function loadEvents(){
     toast("請先在 config.js 填好 API_BASE / LIFF_ID", "error");
     return;
   }
-  try{
-    const data = await apiGet({ action:"listEvents" });
-    renderEvents(data.events || []);
-  }catch(e){
-    console.error(e);
-    toast(e.message, "error");
-  }
+  const data = await apiGet({ action:"listEvents" });
+  renderEvents(data.events || []);
 }
 
 async function submitRegistration(){
@@ -302,20 +324,20 @@ async function submitRegistration(){
     return;
   }
   const segments = getSelectedSegmentIds();
-  try{
-    await apiPost({
-      action:"register",
-      eventId: CURRENT_EVENT.eventId,
-      userId: USER.userId,
-      displayName: USER.displayName,
-      segments
-    });
-    toast("已更新報名 ✅", "success");
-    await loadEvent(CURRENT_EVENT.eventId);
-  }catch(e){
-    console.error(e);
-    toast(e.message, "error");
-  }
+  const adults = clampInt(document.getElementById("adults").value, 0, 20);
+  const kids = clampInt(document.getElementById("kids").value, 0, 20);
+
+  await apiPost({
+    action:"register",
+    eventId: CURRENT_EVENT.eventId,
+    userId: USER.userId,
+    displayName: USER.displayName,
+    adults,
+    kids,
+    segments
+  });
+  toast("已更新報名 ✅", "success");
+  await loadEvent(CURRENT_EVENT.eventId);
 }
 
 async function shareEvent(){
@@ -323,20 +345,14 @@ async function shareEvent(){
   if (!USER || !USER.liffReady) return;
   const url = window.location.origin + window.location.pathname + "?eventId=" + encodeURIComponent(CURRENT_EVENT.eventId);
   const text = `📌 ${CURRENT_EVENT.title}\n${CURRENT_EVENT.description || ""}\n\n點此報名（可選段落）：\n${url}`;
-  try{
-    await liff.shareTargetPicker([{ type:"text", text }]);
-    toast("已開啟分享", "success");
-  }catch(e){
-    console.warn(e);
-    toast("分享已取消或失敗", "error");
-  }
+  await liff.shareTargetPicker([{ type:"text", text }]);
 }
 
 document.getElementById("btnAll").onclick = ()=> setAllSegments(true);
 document.getElementById("btnNone").onclick = ()=> setAllSegments(false);
-document.getElementById("btnSubmit").onclick = submitRegistration;
-document.getElementById("btnRefresh").onclick = refreshStats;
-document.getElementById("btnShare").onclick = shareEvent;
+document.getElementById("btnSubmit").onclick = ()=> submitRegistration().catch(e=>toast(e.message,"error"));
+document.getElementById("btnRefresh").onclick = ()=> refreshStats().catch(e=>toast(e.message,"error"));
+document.getElementById("btnShare").onclick = ()=> shareEvent().catch(()=>toast("分享已取消或失敗","error"));
 
 (async ()=>{
   USER = await initLiffIfAvailable();
