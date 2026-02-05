@@ -10,8 +10,8 @@
  */
 
 // ====== 請設定 ======
-var SPREADSHEET_ID = 'REPLACE_WITH_YOUR_SPREADSHEET_ID';
-var ADMIN_TOKEN = 'REPLACE_WITH_YOUR_ADMIN_TOKEN';
+var SPREADSHEET_ID = '1_hklG4_dEr42TDDZSWOCTSsCD-66OCnpwXcwftNh0Uo';
+var ADMIN_TOKEN = 'aa278071jesnkimo';
 // ===================
 
 var SHEETS = {
