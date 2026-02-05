@@ -191,11 +191,11 @@ function renderSegments(segments, selectedSegmentIds){
             <input class="form-check-input seg-check" type="checkbox" data-segid="${seg.segmentId}" ${checked}>
           </div>
           <div class="flex-grow-1">
-            <div class="small-muted fw-semibold">行程 ${seg.order}</div>
-            <div class="seg-title mt-1">${escapeHtml(seg.location)}</div>
+            <div class="seg-title">${escapeHtml(seg.location)}</div>
             <div class="seg-meta mt-1">
               ${time ? `<span class="badge text-bg-light border mono">${escapeHtml(time)}</span>` : ""}
-</div>
+              <span class="badge text-bg-light border">行程 ${seg.order}</span>
+            </div>
             ${seg.highlights ? `<div class="segment-highlight small-muted mt-2">${escapeHtml(seg.highlights)}</div>` : ""}
           </div>
         </div>
@@ -350,7 +350,6 @@ document.getElementById("btnAll").onclick = ()=> setAllSegments(true);
 document.getElementById("btnNone").onclick = ()=> setAllSegments(false);
 document.getElementById("btnSubmit").onclick = ()=> submitRegistration().catch(e=>toast(e.message,"error"));
 document.getElementById("btnRefresh").onclick = ()=> refreshStats().catch(e=>toast(e.message,"error"));
-
 (async ()=>{
   USER = await initLiffIfAvailable();
   setUserPill(USER);
