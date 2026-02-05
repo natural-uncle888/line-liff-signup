@@ -78,6 +78,7 @@ let segCounter = 0;
 function segTemplate(data={}){
   segCounter += 1;
   const date = data.date || "";
+  const endDate = data.endDate || "";
   const startTime = data.startTime || "";
   const endTime = data.endTime || "";
   const location = data.location || "";
@@ -93,14 +94,18 @@ function segTemplate(data={}){
       </div>
       <div class="row g-2 mt-2">
         <div class="col-md-4">
-          <label class="form-label">日期</label>
+          <label class="form-label">開始日期</label>
           <input class="form-control" type="date" data-field="date" value="${escapeHtml(date)}">
         </div>
         <div class="col-md-4">
+          <label class="form-label">結束日期（可空）</label>
+          <input class="form-control" type="date" data-field="endDate" value="${escapeHtml(endDate)}">
+        </div>
+        <div class="col-md-2">
           <label class="form-label">開始</label>
           <input class="form-control" type="time" data-field="startTime" value="${escapeHtml(startTime)}">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2">
           <label class="form-label">結束</label>
           <input class="form-control" type="time" data-field="endTime" value="${escapeHtml(endTime)}">
         </div>
@@ -123,7 +128,7 @@ function getSegmentsFromEditor(){
   const cards = Array.from(document.querySelectorAll("#segmentsEditor .card"));
   return cards.map((card, idx)=>{
     const get = (field)=> card.querySelector(`[data-field="${field}"]`).value.trim();
-    return { order: idx + 1, date: get("date"), startTime: get("startTime"), endTime: get("endTime"), location: get("location"), highlights: get("highlights") };
+    return { order: idx + 1, date: get("date"), endDate: get("endDate"), startTime: get("startTime"), endTime: get("endTime"), location: get("location"), highlights: get("highlights") };
   });
 }
 
