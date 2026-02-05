@@ -42,7 +42,7 @@
               <div class="small-muted" id="eventDesc"></div>
             </div>
             <div class="text-end">
-              <button class="btn btn-sm btn-outline-primary" id="btnShare" disabled>複製報名網址</button>
+              <button class="btn btn-sm btn-outline-primary" id="btnShare" disabled>在 LINE 分享此活動</button>
             </div>
           </div>
 
@@ -299,7 +299,7 @@ async function loadEvent(eventId){
     document.getElementById("btnNone").disabled = !isOpen;
     document.getElementById("btnSubmit").disabled = !isOpen;
     document.getElementById("btnRefresh").disabled = false;
-    document.getElementById("btnShare").disabled = false;
+    document.getElementById("btnShare").disabled = !(USER && USER.liffReady);
 
     await refreshStats();
   }catch(e){
@@ -340,26 +340,14 @@ async function submitRegistration(){
   await loadEvent(CURRENT_EVENT.eventId);
 }
 
-async function copyEventLink(){
+async function shareEvent(){
   if (!CURRENT_EVENT) return;
+  if (!USER || !USER.liffReady) return;
   const url = window.location.origin + window.location.pathname + "?eventId=" + encodeURIComponent(CURRENT_EVENT.eventId);
-
-  try{
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      await navigator.clipboard.writeText(url);
-      toast("已複製報名網址 ✅", "success");
-    }else{
-      // Fallback for older browsers / non-secure context
-      window.prompt("複製這個報名網址：", url);
-    }
-  }catch(e){
-    // Some browsers block clipboard unless user gesture / permissions
-    window.prompt("複製這個報名網址：", url);
-  }
-}
+  const text = `📌 ${CURRENT_EVENT.title}
 ${CURRENT_EVENT.description || ""}
 
-報名連結：
+點此報名（可選行程參加）：
 ${url}`;
 
   // shareTargetPicker: 取消分享時通常會回傳 null/undefined
