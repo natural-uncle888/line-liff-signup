@@ -147,7 +147,7 @@ function renderEvents(events){
   const list = document.getElementById("eventsList");
   list.innerHTML = "";
   if (!events.length){
-    list.innerHTML = `<div class="small-muted">目前沒有 可參加的 活動</div>`;
+    list.innerHTML = `<div class="small-muted">目前沒有 OPEN 活動</div>`;
     return;
   }
   events.forEach(ev=>{
