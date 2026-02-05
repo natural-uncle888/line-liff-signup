@@ -161,7 +161,7 @@ function setLoading(on, text){
       if (t){
         t.className = "alert alert-warning";
         t.style.display = "block";
-        t.textContent = "載入時間較長，已自動關閉提示（可再試一次或稍後重整）";
+        t.textContent = "自動關閉提示（如資料未出現可再試一次或稍後重整）";
         setTimeout(()=>{ t.style.display="none"; }, 3500);
       }
     }, 10000);

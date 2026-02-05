@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>班級活動報名（LIFF）</title>
+  <title>波斯菊班活動報名系統</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="./styles.css" rel="stylesheet">
 </head>
@@ -43,7 +43,7 @@
           <h5 class="card-title mb-2">活動列表</h5>
           <div class="small-muted mb-3">選一個活動開始報名（可選段落）</div>
           <div id="eventsList" class="list-group"></div>
-          <div class="small-muted mt-3">提示：在 LINE 內開啟會自動帶入姓名並顯示名單（更有「跟風」效果）。</div>
+          <div class="small-muted mt-3">提示：在 LINE 內開啟會自動帶入姓名並顯示名單。</div>
         </div>
       </div>
     </div>
@@ -196,7 +196,7 @@ function renderEvents(events){
   }
 
   if (!events.length){
-    list.innerHTML = `<div class="small-muted">目前沒有 OPEN 活動</div>`;
+    list.innerHTML = `<div class="small-muted">目前沒有活動</div>`;
     return;
   }
 
@@ -221,8 +221,8 @@ function renderEventHeader(ev){
   document.getElementById("eventDesc").textContent = ev.description || "";
   document.getElementById("eventStatus").innerHTML =
     ev.status === "OPEN"
-      ? `<div class="alert alert-success mb-0">🟢 報名中（OPEN）</div>`
-      : `<div class="alert alert-secondary mb-0">⚪ 已結單（CLOSED）</div>`;
+      ? `<div class="alert alert-success mb-0">🟢 報名中</div>`
+      : `<div class="alert alert-secondary mb-0">⚪ 已結單</div>`;
 }
 
 function renderSegments(segments, selectedSegmentIds){
