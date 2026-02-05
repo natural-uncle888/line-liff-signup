@@ -133,3 +133,21 @@ function clampInt(v, min=0, max=99){
   if (Number.isNaN(n)) return min;
   return Math.max(min, Math.min(max, Math.floor(n)));
 }
+
+
+// ---- Loading overlay helpers ----
+let __loadingCount = 0;
+function setLoading(on, text){
+  const el = document.getElementById("loadingOverlay");
+  const txt = document.getElementById("loadingText");
+  if (!el) return;
+
+  if (on){
+    __loadingCount += 1;
+    if (text && txt) txt.textContent = text;
+    el.style.display = "block";
+  } else {
+    __loadingCount = Math.max(0, __loadingCount - 1);
+    if (__loadingCount === 0) el.style.display = "none";
+  }
+}
