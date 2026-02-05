@@ -210,7 +210,7 @@ function renderEvents(events){
       </div>
       <span class="badge text-bg-${ev.status === "OPEN" ? "success" : "secondary"}">${ev.status}</span>
     `;
-    a.onclick = ()=> loadEvent(ev.eventId);
+    a.onclick = ()=> { setLoading(true, "載入活動內容…"); setTimeout(()=>loadEvent(ev.eventId), 0); };
     list.appendChild(a);
   });
 }
@@ -325,6 +325,7 @@ async function refreshStats(){
   const sp = document.getElementById("regsSpinner");
   if (firstTime){
     setLoading(true, "載入報名名單…");
+    await nextFrame();
   }else{
     if (sp) sp.style.display = "inline-block";
   }
@@ -403,6 +404,7 @@ async function submitRegistration(){
   const childName = document.getElementById("childName").value.trim();
 
   setLoading(true, "送出報名…");
+  await nextFrame();
   try{
     await apiPost({
       action:"register",

@@ -151,3 +151,9 @@ function setLoading(on, text){
     if (__loadingCount === 0) el.style.display = "none";
   }
 }
+
+
+// Yield to browser so loading overlay can paint immediately
+function nextFrame(){
+  return new Promise(resolve => requestAnimationFrame(() => resolve()));
+}
