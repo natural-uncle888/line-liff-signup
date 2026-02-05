@@ -69,7 +69,7 @@
           <div id="segmentsEditor" class="vstack gap-2"></div>
 
           <div class="d-flex flex-wrap gap-2 mt-3">
-            <button class="btn btn-primary" id="btnCreate">建立新活動</button>
+            <button class="btn btn-primary" id="btnCreate">建立新活動（OPEN）</button>
             <button class="btn btn-success" id="btnUpdate" disabled>更新活動內容</button>
             <button class="btn btn-outline-secondary" id="btnSeed">快速帶入範例行程</button>
             <button class="btn btn-outline-danger" id="btnNew">切回新活動（清空）</button>
@@ -81,10 +81,10 @@
     <div class="col-lg-6">
       <div class="card shadow-sm">
         <div class="card-body">
-          <h5 class="card-title mb-1">結單</h5>
+          <h5 class="card-title mb-1">結單（CLOSE）</h5>
           <div class="small-muted mb-3">結單後前台仍可查看名單，但不能再更新報名</div>
           <div class="mb-2">
-            <button class="btn btn-outline-secondary" id="btnReload">重新載入活動</button>
+            <button class="btn btn-outline-secondary" id="btnReload">重新載入 OPEN 活動</button>
           </div>
           <div id="openEvents" class="vstack gap-2"></div>
         </div>
@@ -248,7 +248,7 @@ async function loadOpenEvents(){
   wrap.innerHTML = "";
   const events = data.events || [];
   if (!events.length){
-    wrap.innerHTML = `<div class="small-muted">目前沒有活動</div>`;
+    wrap.innerHTML = `<div class="small-muted">目前沒有 OPEN 活動</div>`;
     return;
   }
   events.forEach(ev=>{

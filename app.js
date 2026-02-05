@@ -157,3 +157,9 @@ function setLoading(on, text){
 function nextFrame(){
   return new Promise(resolve => requestAnimationFrame(() => resolve()));
 }
+
+
+function isLoading(){
+  return typeof __loadingCount !== "undefined" && __loadingCount > 0;
+}
+window.isLoading = isLoading;
