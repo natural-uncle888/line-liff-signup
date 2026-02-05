@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>管理｜建立活動 / 結單</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="./styles.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="./index.html">← 回報名首頁</a>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span class="badge text-bg-light border">管理介面</span>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-3">
+  <div id="toast" class="alert alert-info" style="display:none"></div>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-1">建立活動</h5>
+          <div class="small-muted mb-3">操作簡單，但欄位清楚：先填活動主檔，再一段一段新增行程分段</div>
+
+          <div class="mb-3">
+            <label class="form-label">管理密碼（ADMIN TOKEN）</label>
+            <input class="form-control" id="adminToken" placeholder="請輸入你在 Code.gs 設定的 ADMIN_TOKEN"/>
+            <div class="form-text">此頁面不建議公開分享；若要分享，請用 Netlify 的 Basic Auth 或改為 Google 登入。</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">活動名稱</label>
+            <input class="form-control" id="title" placeholder="例如：苗栗採草莓一日遊"/>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">活動簡述（可空）</label>
+            <textarea class="form-control" id="description" rows="2" placeholder="例如：可選段落參加，方便家長帶孩子"></textarea>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between">
+            <h6 class="mb-2">行程分段（可選段落報名）</h6>
+            <button class="btn btn-sm btn-outline-primary" id="btnAddSeg">＋ 新增一段</button>
+          </div>
+
+          <div id="segmentsEditor" class="vstack gap-2"></div>
+
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-primary" id="btnCreate">建立活動（OPEN）</button>
+            <button class="btn btn-outline-secondary" id="btnSeed">快速帶入範例行程</button>
+          </div>
+
+          <div class="small-muted mt-3">
+            建立後回到首頁即可看到活動。建議在群組分享「首頁」或用首頁的「分享活動」按鈕。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-1">結單（CLOSE）</h5>
+          <div class="small-muted mb-3">結單後前台仍可查看名單，但不能再更新報名</div>
+
+          <div class="mb-2">
+            <button class="btn btn-outline-secondary" id="btnReload">重新載入 OPEN 活動</button>
+          </div>
+
+          <div id="openEvents" class="vstack gap-2"></div>
+
+          <hr/>
+          <div class="small-muted">
+            小提醒：若想「隱藏管理頁」，可把 admin.html 放到 Netlify 的密碼保護路徑，或改成只在自己手機收藏。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+<script>
+let segCounter = 0;
+
+function segTemplate(data={}){
+  segCounter += 1;
+  const id = "segEdit_" + segCounter;
+  const date = data.date || "";
+  const startTime = data.startTime || "";
+  const endTime = data.endTime || "";
+  const location = data.location || "";
+  const highlights = data.highlights || "";
+  const order = data.order || segCounter;
+
+  const wrap = document.createElement("div");
+  wrap.className = "card";
+  wrap.innerHTML = `
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="fw-semibold">段落 #${order}</div>
+        <button type="button" class="btn btn-sm btn-outline-danger">刪除</button>
+      </div>
+
+      <div class="row g-2 mt-1">
+        <div class="col-md-4">
+          <label class="form-label">日期</label>
+          <input class="form-control" type="date" data-field="date" value="${escapeHtml(date)}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">開始</label>
+          <input class="form-control" type="time" data-field="startTime" value="${escapeHtml(startTime)}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">結束</label>
+          <input class="form-control" type="time" data-field="endTime" value="${escapeHtml(endTime)}">
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">地點</label>
+          <input class="form-control" data-field="location" value="${escapeHtml(location)}" placeholder="例如：舞夜天高架草莓園">
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">重點（可換行）</label>
+          <textarea class="form-control" rows="2" data-field="highlights" placeholder="例如：高架草莓，小朋友不用彎腰">${escapeHtml(highlights)}</textarea>
+        </div>
+      </div>
+    </div>
+  `;
+  wrap.querySelector("button").onclick = ()=> wrap.remove();
+  return wrap;
+}
+
+function getSegmentsFromEditor(){
+  const cards = Array.from(document.querySelectorAll("#segmentsEditor .card"));
+  const segments = [];
+  cards.forEach((card, idx)=>{
+    const get = (field)=> card.querySelector(`[data-field="${field}"]`).value.trim();
+    segments.push({
+      order: idx + 1,
+      date: get("date"),
+      startTime: get("startTime"),
+      endTime: get("endTime"),
+      location: get("location"),
+      highlights: get("highlights")
+    });
+  });
+  return segments;
+}
+
+async function createEvent(){
+  if (!isConfigured()){
+    toast("請先在 config.js 填好 API_BASE / LIFF_ID", "error");
+    return;
+  }
+  const adminToken = document.getElementById("adminToken").value.trim();
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const segments = getSegmentsFromEditor();
+
+  if (!adminToken){ toast("請輸入管理密碼", "error"); return; }
+  if (!title){ toast("請輸入活動名稱", "error"); return; }
+  if (!segments.length){ toast("至少新增 1 段行程", "error"); return; }
+
+  try{
+    const data = await apiPost({ action:"createEvent", adminToken, title, description, segments });
+    toast("建立成功 ✅ 已開放報名", "success");
+    // reset
+    document.getElementById("title").value = "";
+    document.getElementById("description").value = "";
+    document.getElementById("segmentsEditor").innerHTML = "";
+    segCounter = 0;
+    addSeg();
+    await loadOpenEvents();
+    // auto open in new tab
+    window.open("./index.html?eventId=" + encodeURIComponent(data.eventId), "_blank");
+  }catch(e){
+    console.error(e);
+    toast(e.message, "error");
+  }
+}
+
+async function loadOpenEvents(){
+  if (!isConfigured()) return;
+  try{
+    const data = await apiGet({ action:"listEvents", status:"OPEN" });
+    const wrap = document.getElementById("openEvents");
+    wrap.innerHTML = "";
+    const events = data.events || [];
+    if (!events.length){
+      wrap.innerHTML = `<div class="small-muted">目前沒有 OPEN 活動</div>`;
+      return;
+    }
+    events.forEach(ev=>{
+      const el = document.createElement("div");
+      el.className = "border rounded-3 p-2 bg-white d-flex justify-content-between align-items-start gap-2";
+      el.innerHTML = `
+        <div>
+          <div class="fw-semibold">${escapeHtml(ev.title)}</div>
+          <div class="small-muted">${escapeHtml(ev.description || "")}</div>
+          <div class="small-muted mono">${escapeHtml(ev.eventId)}</div>
+        </div>
+        <div class="d-flex flex-column gap-2">
+          <a class="btn btn-sm btn-outline-primary" href="./index.html?eventId=${encodeURIComponent(ev.eventId)}" target="_blank">開啟</a>
+          <button class="btn btn-sm btn-outline-danger">結單</button>
+        </div>
+      `;
+      el.querySelector("button").onclick = ()=> closeEvent(ev.eventId);
+      wrap.appendChild(el);
+    });
+  }catch(e){
+    console.error(e);
+    toast(e.message, "error");
+  }
+}
+
+async function closeEvent(eventId){
+  const adminToken = document.getElementById("adminToken").value.trim();
+  if (!adminToken){ toast("請輸入管理密碼", "error"); return; }
+  if (!confirm("確定要結單？結單後前台不能再更新報名")) return;
+  try{
+    await apiPost({ action:"closeEvent", adminToken, eventId });
+    toast("已結單", "success");
+    await loadOpenEvents();
+  }catch(e){
+    console.error(e);
+    toast(e.message, "error");
+  }
+}
+
+function addSeg(data){
+  document.getElementById("segmentsEditor").appendChild(segTemplate(data));
+}
+
+function seedExample(){
+  // 依你提供的行程示例：以同一天為例（可自行改日期）
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,"0");
+  const dd = String(today.getDate()).padStart(2,"0");
+  const date = `${yyyy}-${mm}-${dd}`;
+  const example = [
+    {date, startTime:"08:00", endTime:"09:20", location:"台中「馬卡龍公園路邊停車格」集合出發", highlights:"集合、點名、出發", order:1},
+    {date, startTime:"09:20", endTime:"10:30", location:"舞夜天高架草莓園", highlights:"高架草莓，小朋友不用彎腰\n通道寬，適合幼兒園孩子自己採", order:2},
+    {date, startTime:"10:50", endTime:"11:30", location:"大湖酒莊", highlights:"上廁所、吃冰、買伴手禮\n小朋友可稍微走動放風", order:3},
+    {date, startTime:"11:50", endTime:"12:50", location:"福樂麵店（午餐）", highlights:"客家麵、滷味，孩子接受度高", order:4},
+    {date, startTime:"14:00", endTime:"16:30", location:"西湖渡假村", highlights:"一進園先去恐龍區（會動的恐龍模型）\n草地／小遊具放電\n拍照、小火車（不刺激）", order:5},
+    {date, startTime:"18:10", endTime:"", location:"三義吃客家菜（準時到）", highlights:"晚餐集合", order:6},
+  ];
+  document.getElementById("segmentsEditor").innerHTML = "";
+  segCounter = 0;
+  example.forEach(s=> addSeg(s));
+}
+
+document.getElementById("btnAddSeg").onclick = ()=> addSeg();
+document.getElementById("btnCreate").onclick = createEvent;
+document.getElementById("btnReload").onclick = loadOpenEvents;
+document.getElementById("btnSeed").onclick = seedExample;
+
+// init
+addSeg();
+loadOpenEvents();
+</script>
+</body>
+</html>
