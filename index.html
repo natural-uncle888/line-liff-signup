@@ -194,7 +194,7 @@ function renderSegments(segments, selectedSegmentIds){
             <input class="form-check-input seg-check" type="checkbox" data-segid="${seg.segmentId}" ${checked}>
           </div>
           <div class="flex-grow-1">
-            <div class="small-muted fw-semibold">行程 ${seg.order}</div>
+            ${segments.length > 1 ? `<div class="small-muted fw-semibold">行程 ${seg.order}</div>` : ``}
             <div class="seg-title mt-1">${escapeHtml(seg.location)}</div>
             <div class="seg-meta mt-1">
               ${time ? `<span class="badge text-bg-light border mono">${escapeHtml(time)}</span>` : ""}
