@@ -51,25 +51,7 @@ function doGet(e) {
       return jsonOut({ ok:true, registrations: listRegistrations_(eventId2) });
     }
 
-    
-if (action === 'cancelRegistration') {
-  var eventId = (body.eventId || '').trim();
-  var userId = (body.userId || '').trim();
-  if (!eventId || !userId) return jsonOut({ ok:false, error:'Missing eventId/userId' });
-  deleteRegistration_(eventId, userId);
-  return jsonOut({ ok:true });
-}
-
-if (action === 'deleteRegistration') {
-  requireAdmin_(body.adminToken);
-  var eventId = (body.eventId || '').trim();
-  var targetUserId = (body.userId || '').trim();
-  if (!eventId || !targetUserId) return jsonOut({ ok:false, error:'Missing eventId/userId' });
-  deleteRegistration_(eventId, targetUserId);
-  return jsonOut({ ok:true });
-}
-
-return jsonOut({ ok:false, error:'Unknown action' });
+    return jsonOut({ ok:false, error:'Unknown action' });
 
   } catch (err) {
     return jsonOut({ ok:false, error:String(err) });
@@ -138,6 +120,25 @@ function doPost(e) {
       if (ev.status !== 'OPEN') return jsonOut({ ok:false, error:'Event is CLOSED' });
 
       upsertRegistration_(eventId3, userId, displayName, segments2);
+      return jsonOut({ ok:true });
+    }
+
+
+    if (action === 'cancelRegistration') {
+      var eventId4 = (body.eventId || '').trim();
+      var userId2 = (body.userId || '').trim();
+      if (!eventId4 || !userId2) return jsonOut({ ok:false, error:'Missing eventId/userId' });
+      // Optional: prevent cancel when event closed? Usually allow cancel even after close if you want.
+      deleteRegistration_(eventId4, userId2);
+      return jsonOut({ ok:true });
+    }
+
+    if (action === 'deleteRegistration') {
+      requireAdmin_(body.adminToken);
+      var eventId5 = (body.eventId || '').trim();
+      var targetUserId = (body.userId || '').trim();
+      if (!eventId5 || !targetUserId) return jsonOut({ ok:false, error:'Missing eventId/userId' });
+      deleteRegistration_(eventId5, targetUserId);
       return jsonOut({ ok:true });
     }
 
