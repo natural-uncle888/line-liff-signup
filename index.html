@@ -303,15 +303,17 @@ function renderParticipants(regs, segments){
   }
   regs.forEach(r=>{
     const segOrders = (r.segments || []).map(id=>segMap[id]).filter(Boolean).sort((a,b)=>a-b);
+    const adults = Number(r.adults)||0;
+    const kids = Number(r.kids)||0;
     const el = document.createElement("div");
-    el.className = "d-flex justify-content-between align-items-center border rounded-3 p-2 bg-white";
-    const people = `大${Number(r.adults)||0}・小${Number(r.kids)||0}`;
+    el.className = "reg-card";
     el.innerHTML = `
-      <div class="fw-semibold">${escapeHtml(r.displayName || "（未命名）")}</div>
-      ${r.childName ? `<div class="small-muted">👶 ${escapeHtml(r.childName)}</div>` : ``}
-      <div class="text-end">
-        <div class="small-muted">人數：${people}</div>
-        ${segOrders.length > 1 ? `<div class="small-muted">行程：${segOrders.join(", ")}</div>` : ""}
+      <div class="reg-title">${escapeHtml(r.displayName || "（未命名）")}</div>
+      <div class="reg-meta">
+        ${r.childName ? `<span class="reg-badge">👶 ${escapeHtml(r.childName)}</span>` : ``}
+        <span class="reg-badge">大${adults}</span>
+        <span class="reg-badge">小${kids}</span>
+        ${segOrders.length > 1 ? `<span class="reg-badge reg-badge-muted">行程 ${segOrders.join(", ")}</span>` : ``}
       </div>
     `;
     wrap.appendChild(el);
