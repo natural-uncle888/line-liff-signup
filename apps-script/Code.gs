@@ -82,6 +82,18 @@ function parsePost_(e){
   return body || {};
 }
 
+function safeJson_(v){
+  if (v === undefined || v === null) return [];
+  if (Array.isArray(v)) return v;
+  if (typeof v === 'string'){
+    var s = v.trim();
+    if (!s) return [];
+    try { return JSON.parse(s); } catch(err){ return []; }
+  }
+  return [];
+}
+
+
 function doPost(e) {
   try {
     var body = parsePost_(e);
@@ -92,7 +104,7 @@ function doPost(e) {
       requireAdmin_(body.adminToken);
       var title = (body.title || '').trim();
       var description = (body.description || '').trim();
-      var segments = body.segments || [];
+      var segments = safeJson_(body.segments);
       if (!title) return jsonOut({ ok:false, error:'Missing title' });
       if (!segments.length) return jsonOut({ ok:false, error:'At least 1 segment required' });
 
@@ -112,7 +124,7 @@ function doPost(e) {
       var eventId3 = (body.eventId || '').trim();
       var userId = (body.userId || '').trim();
       var displayName = (body.displayName || '').trim();
-      var segments2 = body.segments || [];
+      var segments2 = safeJson_(body.segments);
       if (!eventId3 || !userId) return jsonOut({ ok:false, error:'Missing eventId/userId' });
 
       var ev = getEvent_(eventId3);
