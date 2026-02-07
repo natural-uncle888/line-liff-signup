@@ -98,7 +98,8 @@ async function initLiffIfAvailable(){
     info.liffReady = true;
     info.isInClient = liff.isInClient();
     if (!liff.isLoggedIn()){
-      liff.login({ redirectUri: window.location.href });
+      const cleanRedirect = window.location.origin + window.location.pathname;
+      liff.login({ redirectUri: cleanRedirect });
       return info;
     }
     const profile = await liff.getProfile();

@@ -301,22 +301,53 @@ function renderParticipants(regs, segments){
     wrap.innerHTML = `<div class="small-muted">還沒有人報名</div>`;
     return;
   }
+
   regs.forEach(r=>{
     const segOrders = (r.segments || []).map(id=>segMap[id]).filter(Boolean).sort((a,b)=>a-b);
-    const adults = Number(r.adults)||0;
-    const kids = Number(r.kids)||0;
-    const el = document.createElement("div");
-    el.className = "reg-card";
-    el.innerHTML = `
-      <div class="reg-title">${escapeHtml(r.displayName || "（未命名）")}</div>
-      <div class="reg-meta">
-        ${r.childName ? `<span class="reg-badge">👶 ${escapeHtml(r.childName)}</span>` : ``}
-        <span class="reg-badge">大${adults}</span>
-        <span class="reg-badge">小${kids}</span>
-        ${segOrders.length > 1 ? `<span class="reg-badge reg-badge-muted">行程 ${segOrders.join(", ")}</span>` : ``}
-      </div>
+    const peopleAdult = Number(r.adults)||0;
+    const peopleKids = Number(r.kids)||0;
+
+    const card = document.createElement("div");
+    card.className = "reg-card";
+
+    // title (2-line clamp)
+    const title = escapeHtml(r.displayName || "（未命名）");
+
+    const badges = [];
+    if (r.childName) badges.push(`<span class="reg-badge">👶 ${escapeHtml(r.childName)}</span>`);
+    badges.push(`<span class="reg-badge">大${peopleAdult}</span>`);
+    badges.push(`<span class="reg-badge">小${peopleKids}</span>`);
+    if (segOrders.length > 1) badges.push(`<span class="reg-badge reg-badge-muted">行程 ${segOrders.join(", ")}</span>`);
+
+    const isMe = USER && USER.userId && r.userId && (USER.userId === r.userId);
+
+    card.innerHTML = `
+      <div class="reg-title line-clamp-2">${title}</div>
+      <div class="reg-meta">${badges.join("")}</div>
+      ${isMe ? `<div class="reg-actions"><button type="button" class="btn btn-sm btn-outline-danger btn-cancel" data-userid="${escapeHtml(r.userId)}">取消我的報名</button></div>` : ``}
     `;
-    wrap.appendChild(el);
+
+    if (isMe){
+      const btn = card.querySelector(".btn-cancel");
+      btn.addEventListener("click", async ()=>{
+        if (!confirm("確定要取消這次報名嗎？")){
+          return;
+        }
+        try{
+          setLoading(true);
+          const res = await apiPost({ action:"cancelRegistration", eventId: CURRENT_EVENT.eventId, userId: USER.userId });
+          if (!res.ok) throw new Error(res.error || "取消失敗");
+          toast("已取消報名", "success");
+          await refreshStats();
+        }catch(e){
+          toast(e.message || "取消失敗", "error");
+        }finally{
+          setLoading(false);
+        }
+      });
+    }
+
+    wrap.appendChild(card);
   });
 }
 

@@ -51,19 +51,58 @@ function doGet(e) {
       return jsonOut({ ok:true, registrations: listRegistrations_(eventId2) });
     }
 
-    return jsonOut({ ok:false, error:'Unknown action' });
+    
+if (action === 'cancelRegistration') {
+  var eventId = (body.eventId || '').trim();
+  var userId = (body.userId || '').trim();
+  if (!eventId || !userId) return jsonOut({ ok:false, error:'Missing eventId/userId' });
+  deleteRegistration_(eventId, userId);
+  return jsonOut({ ok:true });
+}
+
+if (action === 'deleteRegistration') {
+  requireAdmin_(body.adminToken);
+  var eventId = (body.eventId || '').trim();
+  var targetUserId = (body.userId || '').trim();
+  if (!eventId || !targetUserId) return jsonOut({ ok:false, error:'Missing eventId/userId' });
+  deleteRegistration_(eventId, targetUserId);
+  return jsonOut({ ok:true });
+}
+
+return jsonOut({ ok:false, error:'Unknown action' });
 
   } catch (err) {
     return jsonOut({ ok:false, error:String(err) });
   }
 }
 
+
+function parsePost_(e){
+  // Supports both JSON and application/x-www-form-urlencoded
+  var body = {};
+  try{
+    if (e && e.postData && e.postData.contents){
+      var ct = (e.postData.type || '').toLowerCase();
+      if (ct.indexOf('application/json') >= 0){
+        body = JSON.parse(e.postData.contents);
+      }else{
+        // GAS automatically parses form fields into e.parameter
+        body = e.parameter || {};
+      }
+    }else{
+      body = (e && e.parameter) ? e.parameter : {};
+    }
+  }catch(err){
+    // fallback to e.parameter
+    body = (e && e.parameter) ? e.parameter : {};
+  }
+  // normalize number-like fields if present
+  return body || {};
+}
+
 function doPost(e) {
   try {
-    var body = {};
-    if (e && e.postData && e.postData.contents) {
-      body = JSON.parse(e.postData.contents);
-    }
+    var body = parsePost_(e);
     var action = body.action || '';
     if (!action) return jsonOut({ ok:false, error:'Missing action' });
 
@@ -331,6 +370,23 @@ function upsertRegistration_(eventId, userId, displayName, segmentsArr) {
   }
   sh.appendRow([eventId, userId, displayName, segStr, updatedAt]);
 }
+
+
+function deleteRegistration_(eventId, userId){
+  var ss = ss_();
+  var sh = ss.getSheetByName(SHEETS.REGS);
+  var values = sh.getDataRange().getValues();
+  var headers = values[0];
+  var idxEventId = headers.indexOf('eventId');
+  var idxUserId = headers.indexOf('userId');
+  // delete all matching rows (usually 1)
+  for (var r=values.length-1; r>=1; r--){
+    if (values[r][idxEventId] === eventId && values[r][idxUserId] === userId){
+      sh.deleteRow(r+1);
+    }
+  }
+}
+
 
 function parseSegments_(segStr) {
   if (!segStr) return [];
