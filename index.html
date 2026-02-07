@@ -160,9 +160,33 @@
   </div>
 </div>
 
+
+<!-- Confirm Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content confirm-modal">
+      <div class="modal-header border-0 pb-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-0" id="confirmModalBody"></div>
+      <div class="px-3 pb-0 d-none" id="confirmModalErrorWrap">
+        <div class="alert alert-danger py-2 mb-0 small" id="confirmModalError"></div>
+      </div>
+      <div class="modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="confirmModalCancel">返回</button>
+        <button type="button" class="btn btn-danger" id="confirmModalOk">
+          <span class="btn-text">確定</span>
+          <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="./config.js"></script>
 <script src="./app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 let USER = null;
 let CURRENT_EVENT = null;
@@ -330,37 +354,28 @@ function renderParticipants(regs, segments){
     if (isMe){
       const btn = card.querySelector(".btn-cancel");
       btn.addEventListener("click", async ()=>{
-        if (!confirm("確定要取消這次報名嗎？")){
-          return;
-        }
-        try{
-          setLoading(true);
-          const res = await apiPost({ action:"cancelRegistration", eventId: CURRENT_EVENT.eventId, userId: USER.userId });
-          if (!res.ok) throw new Error(res.error || "取消失敗");
-          toast("已取消報名", "success");
-          await refreshStats();
-        }catch(e){
-          toast(e.message || "取消失敗", "error");
-        }finally{
-          setLoading(false);
-        }
+        await confirmDialog({
+          title: "取消報名",
+          message: "確定要取消這次報名嗎？\n\n取消後會從名單移除，若要再參加需重新報名。",
+          confirmText: "確定取消",
+          cancelText: "返回",
+          variant: "danger",
+          busyText: "取消中…",
+          icon: "trash",
+          onConfirm: async ()=>{
+            setLoading(true);
+            const res = await apiPost({ action:"cancelRegistration", eventId: CURRENT_EVENT.eventId, userId: USER.userId });
+            if (!res.ok) throw new Error(res.error || "取消失敗");
+            toast("已取消報名", "success");
+            await refreshStats();
+          }
+        }).finally(()=>{ setLoading(false); });
       });
     }
 
     wrap.appendChild(card);
   });
 }
-
-async function refreshStats(){
-  if (!CURRENT_EVENT) return;
-  const eventId = CURRENT_EVENT.eventId;
-  const firstTime = !LOADED_REGS[eventId];
-
-  const sp = document.getElementById("regsSpinner");
-  if (firstTime){
-    setLoading(true, "載入報名名單…");
-    await nextFrame();
-  }else{
     if (sp) sp.style.display = "inline-block";
   }
 
