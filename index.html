@@ -160,33 +160,9 @@
   </div>
 </div>
 
-
-<!-- Confirm Modal -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content confirm-modal">
-      <div class="modal-header border-0 pb-0">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body pt-0" id="confirmModalBody"></div>
-      <div class="px-3 pb-0 d-none" id="confirmModalErrorWrap">
-        <div class="alert alert-danger py-2 mb-0 small" id="confirmModalError"></div>
-      </div>
-      <div class="modal-footer border-0 pt-2">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="confirmModalCancel">返回</button>
-        <button type="button" class="btn btn-danger" id="confirmModalOk">
-          <span class="btn-text">確定</span>
-          <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="./config.js"></script>
 <script src="./app.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 let USER = null;
 let CURRENT_EVENT = null;
@@ -325,55 +301,22 @@ function renderParticipants(regs, segments){
     wrap.innerHTML = `<div class="small-muted">還沒有人報名</div>`;
     return;
   }
-
   regs.forEach(r=>{
     const segOrders = (r.segments || []).map(id=>segMap[id]).filter(Boolean).sort((a,b)=>a-b);
-    const peopleAdult = Number(r.adults)||0;
-    const peopleKids = Number(r.kids)||0;
-
-    const card = document.createElement("div");
-    card.className = "reg-card";
-
-    // title (2-line clamp)
-    const title = escapeHtml(r.displayName || "（未命名）");
-
-    const badges = [];
-    if (r.childName) badges.push(`<span class="reg-badge">👶 ${escapeHtml(r.childName)}</span>`);
-    badges.push(`<span class="reg-badge">大${peopleAdult}</span>`);
-    badges.push(`<span class="reg-badge">小${peopleKids}</span>`);
-    if (segOrders.length > 1) badges.push(`<span class="reg-badge reg-badge-muted">行程 ${segOrders.join(", ")}</span>`);
-
-    const isMe = USER && USER.userId && r.userId && (USER.userId === r.userId);
-
-    card.innerHTML = `
-      <div class="reg-title line-clamp-2">${title}</div>
-      <div class="reg-meta">${badges.join("")}</div>
-      ${isMe ? `<div class="reg-actions"><button type="button" class="btn btn-sm btn-outline-danger btn-cancel" data-userid="${escapeHtml(r.userId)}">取消我的報名</button></div>` : ``}
+    const adults = Number(r.adults)||0;
+    const kids = Number(r.kids)||0;
+    const el = document.createElement("div");
+    el.className = "reg-card";
+    el.innerHTML = `
+      <div class="reg-title">${escapeHtml(r.displayName || "（未命名）")}</div>
+      <div class="reg-meta">
+        ${r.childName ? `<span class="reg-badge">👶 ${escapeHtml(r.childName)}</span>` : ``}
+        <span class="reg-badge">大${adults}</span>
+        <span class="reg-badge">小${kids}</span>
+        ${segOrders.length > 1 ? `<span class="reg-badge reg-badge-muted">行程 ${segOrders.join(", ")}</span>` : ``}
+      </div>
     `;
-
-    if (isMe){
-      const btn = card.querySelector(".btn-cancel");
-      btn.addEventListener("click", async ()=>{
-        await confirmDialog({
-          title: "取消報名",
-          message: "確定要取消這次報名嗎？\n\n取消後會從名單移除，若要再參加需重新報名。",
-          confirmText: "確定取消",
-          cancelText: "返回",
-          variant: "danger",
-          busyText: "取消中…",
-          icon: "trash",
-          onConfirm: async ()=>{
-            setLoading(true);
-            const res = await apiPost({ action:"cancelRegistration", eventId: CURRENT_EVENT.eventId, userId: USER.userId });
-            if (!res.ok) throw new Error(res.error || "取消失敗");
-            toast("已取消報名", "success");
-            await refreshStats();
-          }
-        }).finally(()=>{ setLoading(false); });
-      });
-    }
-
-    wrap.appendChild(card);
+    wrap.appendChild(el);
   });
 }
 
