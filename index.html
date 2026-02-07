@@ -376,6 +376,17 @@ function renderParticipants(regs, segments){
     wrap.appendChild(card);
   });
 }
+
+async function refreshStats(){
+  if (!CURRENT_EVENT) return;
+  const eventId = CURRENT_EVENT.eventId;
+  const firstTime = !LOADED_REGS[eventId];
+
+  const sp = document.getElementById("regsSpinner");
+  if (firstTime){
+    setLoading(true, "載入報名名單…");
+    await nextFrame();
+  }else{
     if (sp) sp.style.display = "inline-block";
   }
 

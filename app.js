@@ -227,8 +227,8 @@ function confirmDialog(opts){
   const ic = iconMap[options.icon] || iconMap.question;
 
   if (bodyEl){
-    const msgHtml = escapeHtml(String(options.message || "")).replace(/
-/g, "<br>");
+    // Preserve newlines in message
+    const msgHtml = escapeHtml(String(options.message || "")).replace(/\n/g, "<br>");
     bodyEl.innerHTML = `
       <div class="confirm-layout">
         <div class="confirm-icon confirm-icon-${escapeHtml(options.variant)}" aria-hidden="true">${ic.emoji}</div>
