@@ -311,7 +311,7 @@ function renderParticipants(regs, segments){
       ${r.childName ? `<div class="small-muted">👶 ${escapeHtml(r.childName)}</div>` : ``}
       <div class="text-end">
         <div class="small-muted">人數：${people}</div>
-        <div class="small-muted">行程：${segOrders.length ? segOrders.join(", ") : "—"}</div>
+        ${segOrders.length > 1 ? `<div class="small-muted">行程：${segOrders.join(", ")}</div>` : ""}
       </div>
     `;
     wrap.appendChild(el);
