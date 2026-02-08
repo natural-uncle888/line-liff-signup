@@ -48,29 +48,9 @@ function isConfigured(){
 // --- Date/Time formatting (handles ISO + Sheets time 1899-12-30...) ---
 function pickDateYYYYMMDD(value){
   if (!value) return "";
-  // Prefer treating date/time as a local date (Taiwan users expect local, not UTC).
-  // Accept: Date object, 'YYYY-MM-DD', ISO strings, etc.
-  if (Object.prototype.toString.call(value) === "[object Date]") {
-    const d = value;
-    if (!isNaN(d.getTime())) {
-      const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
-      return `${y}-${m}-${dd}`;
-    }
-  }
-  const s = String(value).trim();
+  const s = String(value);
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0,10);
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-
-  // ISO / RFC3339: parse and output LOCAL date
-  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
-    const d = new Date(s);
-    if (!isNaN(d.getTime())) {
-      const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
-      return `${y}-${m}-${dd}`;
-    }
-    return s.slice(0,10);
-  }
-
-  // Fallback: attempt parse
   const d = new Date(s);
   if (!isNaN(d.getTime())) {
     const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
@@ -81,31 +61,11 @@ function pickDateYYYYMMDD(value){
 
 function pickHHMM(value){
   if (!value) return "";
-  // Prefer local time display for Taiwan users.
-  if (Object.prototype.toString.call(value) === "[object Date]") {
-    const d = value;
-    if (!isNaN(d.getTime())) {
-      const hh=String(d.getHours()).padStart(2,'0');
-      const mm=String(d.getMinutes()).padStart(2,'0');
-      return `${hh}:${mm}`;
-    }
-  }
-  const s = String(value).trim();
-
-  // ISO/RFC3339: parse and output LOCAL time
-  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
-    const d = new Date(s);
-    if (!isNaN(d.getTime())) {
-      const hh=String(d.getHours()).padStart(2,'0');
-      const mm=String(d.getMinutes()).padStart(2,'0');
-      return `${hh}:${mm}`;
-    }
-  }
-
-  // Plain HH:MM
+  const s = String(value);
+  const m1 = s.match(/T(\d{2}):(\d{2})/);
+  if (m1) return `${m1[1]}:${m1[2]}`;
   const m2 = s.match(/^(\d{1,2}):(\d{2})/);
   if (m2) return `${m2[1].padStart(2,'0')}:${m2[2]}`;
-
   const d = new Date(s);
   if (!isNaN(d.getTime())) {
     const hh=String(d.getHours()).padStart(2,'0');
