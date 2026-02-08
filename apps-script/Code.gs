@@ -252,6 +252,60 @@ function nowIso_() {
   return new Date().toISOString();
 }
 
+function tz_(){
+  try { return Session.getScriptTimeZone() || 'Asia/Taipei'; } catch(e){ return 'Asia/Taipei'; }
+}
+
+function asDate_(v){
+  if (!v) return null;
+  if (Object.prototype.toString.call(v) === '[object Date]') return v;
+  var s = String(v).trim();
+  if (!s) return null;
+  // Accept ISO / RFC3339
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+    var d = new Date(s);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return null;
+}
+
+function fmtDateLocal_(v){
+  if (!v) return '';
+  if (Object.prototype.toString.call(v) === '[object Date]') {
+    return Utilities.formatDate(v, tz_(), 'yyyy-MM-dd');
+  }
+  var d = asDate_(v);
+  if (d) return Utilities.formatDate(d, tz_(), 'yyyy-MM-dd');
+  // already yyyy-mm-dd
+  var s = String(v).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  return s;
+}
+
+function fmtTimeLocal_(v){
+  if (!v) return '';
+  if (Object.prototype.toString.call(v) === '[object Date]') {
+    return Utilities.formatDate(v, tz_(), 'HH:mm');
+  }
+  var d = asDate_(v);
+  if (d) return Utilities.formatDate(d, tz_(), 'HH:mm');
+  var s = String(v).trim();
+  // accept HH:mm or H:mm
+  var m = s.match(/^(\d{1,2}):(\d{2})/);
+  if (m) return ('0'+m[1]).slice(-2) + ':' + m[2];
+  return s;
+}
+
+function normalizeSegmentForClient_(seg){
+  if (!seg) return seg;
+  seg.date = fmtDateLocal_(seg.date);
+  seg.endDate = fmtDateLocal_(seg.endDate);
+  seg.startTime = fmtTimeLocal_(seg.startTime);
+  seg.endTime = fmtTimeLocal_(seg.endTime);
+  return seg;
+}
+
+
 function rand_(n) {
   var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   var out = '';
@@ -433,7 +487,8 @@ function listSegments_(eventId) {
   var out = [];
   for (var r=1; r<values.length; r++){
     if (values[r][idxEventId] === eventId){
-      out.push(rowToObj_(headers, values[r]));
+      var seg = rowToObj_(headers, values[r]);
+      out.push(normalizeSegmentForClient_(seg));
     }
   }
   out.sort(function(a,b){ return (Number(a.order)||0) - (Number(b.order)||0); });
