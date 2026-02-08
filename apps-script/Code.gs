@@ -147,7 +147,10 @@ function doPost(e) {
       if (!ev) return jsonOut({ ok:false, error:'Event not found' });
       if (ev.status !== 'OPEN') return jsonOut({ ok:false, error:'Event is CLOSED' });
 
-      upsertRegistration_(eventId3, userId, displayName, segments2);
+      var adults = parseInt(body.adults || '0', 10); if (isNaN(adults)) adults = 0;
+      var kids = parseInt(body.kids || '0', 10); if (isNaN(kids)) kids = 0;
+      var childName = (body.childName || '').toString().trim();
+      upsertRegistration_(eventId3, userId, displayName, adults, kids, childName, segments2);
       return jsonOut({ ok:true });
     }
 
@@ -198,20 +201,36 @@ function ss_() {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   ensureSheet_(ss, SHEETS.EVENTS, ['eventId','title','description','status','createdAt','closedAt']);
   ensureSheet_(ss, SHEETS.SEGMENTS, ['eventId','segmentId','date','startTime','endTime','location','highlights','order']);
-  ensureSheet_(ss, SHEETS.REGS, ['eventId','userId','displayName','segments','updatedAt']);
+  ensureSheet_(ss, SHEETS.REGS, ['eventId','userId','displayName','adults','kids','childName','segments','updatedAt']);
   return ss;
 }
 
 function ensureSheet_(ss, name, headers) {
   var sh = ss.getSheetByName(name);
   if (!sh) sh = ss.insertSheet(name);
-  var firstRow = sh.getRange(1,1,1,Math.max(1, sh.getLastColumn())).getValues()[0];
+
+  var lastCol = Math.max(1, sh.getLastColumn());
+  var firstRow = sh.getRange(1, 1, 1, lastCol).getValues()[0];
+
   // If empty, set headers
   if (!firstRow[0]) {
-    sh.getRange(1,1,1,headers.length).setValues([headers]);
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sh.setFrozenRows(1);
+    return;
+  }
+
+  // If not empty, append any missing headers to the end (non-destructive migration)
+  var existing = firstRow.map(function(v){ return String(v || '').trim(); }).filter(function(v){ return v; });
+  var missing = [];
+  for (var i = 0; i < headers.length; i++) {
+    if (existing.indexOf(headers[i]) === -1) missing.push(headers[i]);
+  }
+  if (missing.length) {
+    sh.getRange(1, existing.length + 1, 1, missing.length).setValues([missing]);
     sh.setFrozenRows(1);
   }
 }
+
 
 function nowIso_() {
   return new Date().toISOString();
@@ -374,7 +393,7 @@ function getRegistration_(eventId, userId) {
   return null;
 }
 
-function upsertRegistration_(eventId, userId, displayName, segmentsArr) {
+function upsertRegistration_(eventId, userId, displayName, adults, kids, childName, segmentsArr) {
   var ss = ss_();
   var sh = ss.getSheetByName(SHEETS.REGS);
   var values = sh.getDataRange().getValues();
@@ -383,6 +402,9 @@ function upsertRegistration_(eventId, userId, displayName, segmentsArr) {
   var idxEventId = headers.indexOf('eventId');
   var idxUserId = headers.indexOf('userId');
   var idxDisplayName = headers.indexOf('displayName');
+  var idxAdults = headers.indexOf('adults');
+  var idxKids = headers.indexOf('kids');
+  var idxChildName = headers.indexOf('childName');
   var idxSegments = headers.indexOf('segments');
   var idxUpdatedAt = headers.indexOf('updatedAt');
 
@@ -392,6 +414,9 @@ function upsertRegistration_(eventId, userId, displayName, segmentsArr) {
   for (var r=1; r<values.length; r++){
     if (values[r][idxEventId] === eventId && values[r][idxUserId] === userId){
       sh.getRange(r+1, idxDisplayName+1).setValue(displayName);
+      if (idxAdults >= 0) sh.getRange(r+1, idxAdults+1).setValue(adults);
+      if (idxKids >= 0) sh.getRange(r+1, idxKids+1).setValue(kids);
+      if (idxChildName >= 0) sh.getRange(r+1, idxChildName+1).setValue(childName);
       sh.getRange(r+1, idxSegments+1).setValue(segStr);
       sh.getRange(r+1, idxUpdatedAt+1).setValue(updatedAt);
       return;
