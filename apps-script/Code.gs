@@ -399,30 +399,50 @@ function upsertRegistration_(eventId, userId, displayName, adults, kids, childNa
   var values = sh.getDataRange().getValues();
   var headers = values[0];
 
-  var idxEventId = headers.indexOf('eventId');
-  var idxUserId = headers.indexOf('userId');
-  var idxDisplayName = headers.indexOf('displayName');
-  var idxAdults = headers.indexOf('adults');
-  var idxKids = headers.indexOf('kids');
-  var idxChildName = headers.indexOf('childName');
-  var idxSegments = headers.indexOf('segments');
-  var idxUpdatedAt = headers.indexOf('updatedAt');
+  // Build header -> column index map (1-based)
+  var col = {};
+  for (var i = 0; i < headers.length; i++) {
+    col[String(headers[i]).trim()] = i + 1;
+  }
 
   var segStr = normalizeSegments_(segmentsArr).join(',');
   var updatedAt = nowIso_();
 
-  for (var r=1; r<values.length; r++){
-    if (values[r][idxEventId] === eventId && values[r][idxUserId] === userId){
-      sh.getRange(r+1, idxDisplayName+1).setValue(displayName);
-      if (idxAdults >= 0) sh.getRange(r+1, idxAdults+1).setValue(adults);
-      if (idxKids >= 0) sh.getRange(r+1, idxKids+1).setValue(kids);
-      if (idxChildName >= 0) sh.getRange(r+1, idxChildName+1).setValue(childName);
-      sh.getRange(r+1, idxSegments+1).setValue(segStr);
-      sh.getRange(r+1, idxUpdatedAt+1).setValue(updatedAt);
+  // helper to set a cell if header exists
+  function setIf_(rowIndex1, headerName, value){
+    var c = col[headerName];
+    if (c) sh.getRange(rowIndex1, c).setValue(value);
+  }
+
+  // update existing row
+  var idxEventId = col['eventId'] ? (col['eventId'] - 1) : -1;
+  var idxUserId  = col['userId'] ? (col['userId'] - 1) : -1;
+
+  for (var r = 1; r < values.length; r++) {
+    if (idxEventId >= 0 && idxUserId >= 0 && values[r][idxEventId] === eventId && values[r][idxUserId] === userId) {
+      var row1 = r + 1;
+      setIf_(row1, 'displayName', displayName);
+      setIf_(row1, 'adults', adults);
+      setIf_(row1, 'kids', kids);
+      setIf_(row1, 'childName', childName);
+      setIf_(row1, 'segments', segStr);
+      setIf_(row1, 'updatedAt', updatedAt);
       return;
     }
   }
-  sh.appendRow([eventId, userId, displayName, segStr, updatedAt]);
+
+  // append new row with correct column alignment
+  var row = new Array(headers.length).fill('');
+  if (col['eventId']) row[col['eventId'] - 1] = eventId;
+  if (col['userId']) row[col['userId'] - 1] = userId;
+  if (col['displayName']) row[col['displayName'] - 1] = displayName;
+  if (col['adults']) row[col['adults'] - 1] = adults;
+  if (col['kids']) row[col['kids'] - 1] = kids;
+  if (col['childName']) row[col['childName'] - 1] = childName;
+  if (col['segments']) row[col['segments'] - 1] = segStr;
+  if (col['updatedAt']) row[col['updatedAt'] - 1] = updatedAt;
+
+  sh.appendRow(row);
 }
 
 
