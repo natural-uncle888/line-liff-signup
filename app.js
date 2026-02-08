@@ -2,12 +2,40 @@
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
+
+function triggerConfetti(){
+  const box = document.getElementById("confetti");
+  if (!box) return;
+  // clear old
+  box.innerHTML = "";
+  const colors = ["#ff4f98","#ff74ad","#ffc9de","#ffe7a6","#bff7dd","#cfe9ff","#e7d6ff"];
+  const count = 42;
+  for (let i=0;i<count;i++){
+    const p = document.createElement("div");
+    p.className = "confetti-piece";
+    const left = Math.random()*100;
+    const drift = (Math.random()*2-1) * 120; // px
+    const dur = 1200 + Math.random()*900;
+    const delay = Math.random()*120;
+    p.style.left = left + "vw";
+    p.style.setProperty("--drift", drift.toFixed(0) + "px");
+    p.style.setProperty("--dur", dur.toFixed(0) + "ms");
+    p.style.setProperty("--delay", delay.toFixed(0) + "ms");
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.transform = "rotate(" + (Math.random()*180) + "deg)";
+    box.appendChild(p);
+  }
+  // auto cleanup
+  setTimeout(()=>{ if (box) box.innerHTML = ""; }, 2200);
+}
+
 function toast(msg, kind="info"){
   const el = $("#toast");
   el.className = "alert alert-" + (kind === "error" ? "danger" : kind);
   el.textContent = msg;
   el.style.display = "block";
   setTimeout(()=>{ el.style.display = "none"; }, 3500);
+  if (kind === "success") triggerConfetti();
 }
 
 async function apiGet(params){

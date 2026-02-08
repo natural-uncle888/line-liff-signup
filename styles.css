@@ -264,7 +264,7 @@ body {
   background-image:
     radial-gradient(1200px 600px at 15% 0%, rgba(255, 177, 211, .45), rgba(255,255,255,0) 60%),
     radial-gradient(900px 500px at 85% 15%, rgba(255, 226, 241, .70), rgba(255,255,255,0) 55%),
-    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27120%27%20height%3D%27120%27%20viewBox%3D%270%200%20120%20120%27%3E%0A%3Crect%20width%3D%27120%27%20height%3D%27120%27%20fill%3D%27none%27/%3E%0A%3Cg%20opacity%3D%270.55%27%3E%0A%20%20%3Cpath%20d%3D%27M25%2034c0-6%205-11%2011-11%204%200%207%202%209%205%202-3%205-5%209-5%206%200%2011%205%2011%2011%200%2012-20%2022-20%2022S25%2046%2025%2034z%27%20fill%3D%27%23ff7bb5%27/%3E%0A%20%20%3Ccircle%20cx%3D%2788%27%20cy%3D%2726%27%20r%3D%276%27%20fill%3D%27%23ffd1e5%27/%3E%0A%20%20%3Cpath%20d%3D%27M88%2046l3%207%208%20.6-6%205%202%208-7-4-7%204%202-8-6-5%208-.6z%27%20fill%3D%27%23ffb3d3%27/%3E%0A%20%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2786%27%20r%3D%275%27%20fill%3D%27%23ffe3f1%27/%3E%0A%20%20%3Cpath%20d%3D%27M78%2082c0-5%204-9%209-9%203%200%206%202%207%204%202-2%204-4%207-4%205%200%209%204%209%209%200%2010-16%2018-16%2018S78%2092%2078%2082z%27%20fill%3D%27%23ff99c8%27/%3E%0A%3C/g%3E%0A%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27240%27%20height%3D%27240%27%20viewBox%3D%270%200%20240%20240%27%3E%0A%20%20%3Cg%20fill%3D%27none%27%3E%0A%20%20%20%20%3Cpath%20d%3D%27M60%2072c6-18%2032-18%2038%200%2014-4%2028%206%2028%2020%200%2016-12%2026-26%2026H68C54%20118%2042%20108%2042%2092c0-12%208-18%2018-20z%27%20fill%3D%27%23ffffff%27%20fill-opacity%3D%27.22%27/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M160%20164c5-15%2026-15%2031%200%2012-3%2022%205%2022%2016%200%2013-10%2021-20%2021h-26c-12%200-22-8-22-21%200-10%207-15%2015-16z%27%20fill%3D%27%23ffffff%27%20fill-opacity%3D%27.18%27/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M188%2058l3%207%207%203-7%203-3%207-3-7-7-3%207-3%203-7z%27%20fill%3D%27%23ff7fb0%27%20fill-opacity%3D%27.35%27/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M72%20170l2%205%205%202-5%202-2%205-2-5-5-2%205-2%202-5z%27%20fill%3D%27%238fd3ff%27%20fill-opacity%3D%27.35%27/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M118%2054c-6-8-18-4-18%206%200%208%2010%2012%2018%2020%208-8%2018-12%2018-20%200-10-12-14-18-6z%27%20fill%3D%27%23ff4f98%27%20fill-opacity%3D%27.18%27/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M198%20118c-5-7-16-3-16%206%200%207%209%2011%2016%2018%207-7%2016-11%2016-18%200-9-11-13-16-6z%27%20fill%3D%27%23ff4f98%27%20fill-opacity%3D%27.14%27/%3E%0A%20%20%3C/g%3E%0A%3C/svg%3E");
   background-repeat: no-repeat, no-repeat, repeat;
   background-size: auto, auto, 220px 220px;
   background-attachment: fixed;
@@ -354,3 +354,132 @@ body {
     50% { transform: rotate(2deg); }
   }
 }
+
+
+/* ===== v3 超童趣版：更像幼兒園（不影響可讀性） ===== */
+:root{
+  --mint:#bff7dd;
+  --sky:#cfe9ff;
+  --sun:#ffe7a6;
+  --lav:#e7d6ff;
+  --peach:#ffd0c6;
+}
+
+/* 雲朵＋星星＋愛心底紋（很淡） */
+body{
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(255, 200, 225,.65), transparent 60%),
+    radial-gradient(900px 520px at 90% 10%, rgba(210, 235, 255,.65), transparent 55%),
+    radial-gradient(900px 520px at 20% 85%, rgba(231, 214, 255,.55), transparent 55%),
+    radial-gradient(700px 420px at 85% 90%, rgba(255, 231, 166,.45), transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none'%3E%3Cpath d='M60 72c6-18 32-18 38 0 14-4 28 6 28 20 0 16-12 26-26 26H68C54 118 42 108 42 92c0-12 8-18 18-20z' fill='%23ffffff' fill-opacity='.28'/%3E%3Cpath d='M160 164c5-15 26-15 31 0 12-3 22 5 22 16 0 13-10 21-20 21h-26c-12 0-22-8-22-21 0-10 7-15 15-16z' fill='%23ffffff' fill-opacity='.20'/%3E%3Cpath d='M188 58l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z' fill='%23ff7fb0' fill-opacity='.25'/%3E%3Cpath d='M46 176l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5 2.5-6z' fill='%2366c7ff' fill-opacity='.22'/%3E%3Cpath d='M118 190c10-16 26-10 26 4 0 10-9 18-26 28-17-10-26-18-26-28 0-14 16-20 26-4z' fill='%23ff5a9a' fill-opacity='.14'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+  background-size: auto, auto, auto, auto, 240px 240px;
+}
+
+/* 卡片更像貼紙 */
+.card, .k-card, .panel, .card-soft{
+  position: relative;
+  border: 2px solid rgba(255, 79, 152, .18);
+  box-shadow: 0 12px 30px rgba(255, 79, 152, .10), 0 8px 18px rgba(0,0,0,.06);
+}
+
+.card::after, .k-card::after{
+  content: "🎀";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 36px;
+  height: 36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(255,255,255,.9);
+  border: 2px solid rgba(255, 79, 152,.22);
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.08);
+  transform: rotate(6deg);
+}
+
+/* 標題像彩虹貼紙 */
+h1,h2,h3,h4,h5{
+  position: relative;
+}
+h1::after, h2::after{
+  content:"";
+  display:block;
+  height: 6px;
+  width: min(180px, 40%);
+  margin-top: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pink-400), var(--sun), var(--mint), var(--sky), var(--lav));
+  opacity: .9;
+}
+
+/* 按鈕更Q彈 */
+.btn{
+  border-radius: 999px !important;
+  letter-spacing: .2px;
+}
+.btn-primary{
+  box-shadow: 0 14px 30px rgba(255, 79, 152,.18);
+}
+.btn-primary:active{
+  transform: translateY(1px) scale(.99);
+}
+.btn-primary:hover{
+  filter: saturate(1.06);
+}
+
+/* 小小彈跳（只在 hover/點擊，不會干擾） */
+@media (hover:hover){
+  .btn-primary:hover{ animation: btnPop .22s ease-out; }
+}
+@keyframes btnPop{
+  0%{ transform: translateY(0) scale(1); }
+  60%{ transform: translateY(-1px) scale(1.01); }
+  100%{ transform: translateY(0) scale(1); }
+}
+
+/* Toast 成功時更像貼紙 */
+#toast.alert-success{
+  border: 2px solid rgba(31, 197, 142, .25);
+  box-shadow: 0 12px 26px rgba(31, 197, 142,.10);
+}
+#toast.alert-success::before{
+  content:"✅ ";
+}
+
+/* Confetti（成功時彩紙） */
+.confetti-container{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2000;
+}
+.confetti-piece{
+  position: absolute;
+  top: -12px;
+  width: 10px;
+  height: 14px;
+  border-radius: 3px;
+  opacity: .9;
+  transform: rotate(0deg);
+  animation: confettiFall var(--dur) linear var(--delay) forwards;
+  will-change: transform, top, opacity;
+}
+@keyframes confettiFall{
+  0%{ transform: translate3d(0,0,0) rotate(0deg); opacity: 1; }
+  90%{ opacity: 1; }
+  100%{ transform: translate3d(var(--drift), 105vh, 0) rotate(540deg); opacity: 0; }
+}
+
+/* Modal 變成更可愛的貼紙卡 */
+.modal-content{
+  border: 2px solid rgba(255, 79, 152,.18);
+}
+.modal-header{
+  background: linear-gradient(135deg, rgba(255, 79, 152,.18), rgba(207, 233, 255,.55));
+}
+.modal-title::before{ content:"🧸 "; }
