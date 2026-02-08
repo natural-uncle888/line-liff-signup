@@ -11,7 +11,7 @@
 
 // ====== 請設定 ======
 var SPREADSHEET_ID = '1_hklG4_dEr42TDDZSWOCTSsCD-66OCnpwXcwftNh0Uo';
-var ADMIN_TOKEN = 'aa278071jesnkimo';
+var ADMIN_TOKEN = '12345';
 // ===================
 
 var SHEETS = {

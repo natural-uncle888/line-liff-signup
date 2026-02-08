@@ -98,6 +98,9 @@
                     <button class="btn btn-outline-secondary" id="btnNone" disabled>↩︎ 取消全程</button>
                     <button class="btn btn-primary" id="btnSubmit" disabled>送出 / 更新報名</button>
                   </div>
+                  <div class="mt-2 pt-2 border-top">
+                    <button class="btn btn-sm btn-outline-danger w-100" id="btnCancelReg" style="display:none">⛔ 取消報名 (刪除資料)</button>
+                  </div>
                 </div>
                 <div class="small-muted mt-2">結單後仍可查看名單，但不能再更新報名。</div>
               </div>
@@ -372,6 +375,15 @@ async function loadEvent(eventId){
     document.getElementById("btnRefresh").disabled = false;
     document.getElementById("btnShare").disabled = !(USER && USER.liffReady);
 
+    // [新增] 取消報名按鈕顯示邏輯：只有當有 CURRENT_REG (已報名) 且 userId 一致時顯示
+    // 另外可以考慮活動結束是否允許取消 (目前設定：開放時才允許取消)
+    const btnCancel = document.getElementById("btnCancelReg");
+    if (CURRENT_REG && isOpen) {
+      btnCancel.style.display = "block";
+    } else {
+      btnCancel.style.display = "none";
+    }
+
     await refreshStats();
   }catch(e){
     console.error(e);
@@ -427,6 +439,37 @@ async function submitRegistration(){
   }
 }
 
+async function cancelRegistration(){
+  if (!CURRENT_EVENT) return;
+  if (!USER || !USER.userId) return;
+  
+  if (!confirm("確定要取消報名？您的資料將會被移除。")) return;
+
+  setLoading(true, "取消中…");
+  await nextFrame();
+  try{
+    await apiPost({
+      action:"cancelRegistration",
+      eventId: CURRENT_EVENT.eventId,
+      userId: USER.userId
+    });
+    toast("已取消報名 🗑️", "success");
+    
+    // 清空表單
+    document.getElementById("adults").value = "";
+    document.getElementById("kids").value = "";
+    document.getElementById("childName").value = "";
+    setAllSegments(false);
+    
+    // 重新載入活動狀態 (按鈕會消失)
+    await loadEvent(CURRENT_EVENT.eventId);
+  } catch(e) {
+    toast("取消失敗：" + e.message, "error");
+  } finally {
+    setLoading(false);
+  }
+}
+
 async function shareEvent(){
   if (!CURRENT_EVENT) return;
   if (!USER || !USER.liffReady) return;
@@ -446,6 +489,7 @@ ${url}`;
 document.getElementById("btnAll").onclick = ()=> setAllSegments(true);
 document.getElementById("btnNone").onclick = ()=> setAllSegments(false);
 document.getElementById("btnSubmit").onclick = ()=> submitRegistration().catch(e=>toast(e.message,"error"));
+document.getElementById("btnCancelReg").onclick = ()=> cancelRegistration().catch(e=>toast(e.message,"error")); // 新增事件綁定
 document.getElementById("btnRefresh").onclick = ()=> refreshStats().catch(e=>toast(e.message,"error"));
 document.getElementById("btnShare").onclick = ()=> shareEvent().catch(e=>toast("分享失敗：" + (e?.message || ""), "error"));
 
