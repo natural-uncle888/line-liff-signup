@@ -11,7 +11,7 @@
 
 // ====== 請設定 ======
 var SPREADSHEET_ID = '1_hklG4_dEr42TDDZSWOCTSsCD-66OCnpwXcwftNh0Uo';
-var ADMIN_TOKEN = 'aa278071jesnkimo';
+var ADMIN_TOKEN = '12345';
 // ===================
 
 var SHEETS = {
@@ -82,6 +82,34 @@ function parsePost_(e){
   return body || {};
 }
 
+
+function safeJson_(v){
+  if (v == null) return null;
+  if (typeof v === 'object') return v;
+  if (typeof v === 'string'){
+    try { return JSON.parse(v); } catch(e) { return null; }
+  }
+  return null;
+}
+
+// Normalize segments payload from POST body:
+// - If array already -> return array
+// - If JSON string -> parse
+// - If comma-separated string -> split by ','
+function normalizeSegments_(v){
+  if (Array.isArray(v)) return v;
+  var parsed = safeJson_(v);
+  if (Array.isArray(parsed)) return parsed;
+  if (typeof v === 'string'){
+    var s = v.trim();
+    if (!s) return [];
+    // allow legacy "SEG-0001,SEG-0002"
+    return s.split(',').map(function(x){ return x.trim(); }).filter(String);
+  }
+  return [];
+}
+
+
 function doPost(e) {
   try {
     var body = parsePost_(e);
@@ -92,7 +120,7 @@ function doPost(e) {
       requireAdmin_(body.adminToken);
       var title = (body.title || '').trim();
       var description = (body.description || '').trim();
-      var segments = body.segments || [];
+      var segments = normalizeSegments_(body.segments);
       if (!title) return jsonOut({ ok:false, error:'Missing title' });
       if (!segments.length) return jsonOut({ ok:false, error:'At least 1 segment required' });
 
@@ -112,7 +140,7 @@ function doPost(e) {
       var eventId3 = (body.eventId || '').trim();
       var userId = (body.userId || '').trim();
       var displayName = (body.displayName || '').trim();
-      var segments2 = body.segments || [];
+      var segments2 = normalizeSegments_(body.segments);
       if (!eventId3 || !userId) return jsonOut({ ok:false, error:'Missing eventId/userId' });
 
       var ev = getEvent_(eventId3);
@@ -358,7 +386,7 @@ function upsertRegistration_(eventId, userId, displayName, segmentsArr) {
   var idxSegments = headers.indexOf('segments');
   var idxUpdatedAt = headers.indexOf('updatedAt');
 
-  var segStr = (segmentsArr || []).join(',');
+  var segStr = normalizeSegments_(segmentsArr).join(',');
   var updatedAt = nowIso_();
 
   for (var r=1; r<values.length; r++){
