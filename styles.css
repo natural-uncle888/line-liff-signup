@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap');
 
 :root{
   --radius: 18px;
@@ -16,7 +16,7 @@
   --ink:#2b2b2b;
 
   /* Bootstrap variable overrides (works with BS5) */
-  --bs-body-font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --bs-body-font-family: "Baloo 2","Nunito",system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   --bs-body-color: var(--ink);
   --bs-primary: var(--pink-500);
   --bs-primary-rgb: 255, 79, 152;
@@ -254,4 +254,103 @@ a{ text-decoration-thickness: 2px; text-underline-offset: 2px; }
 /* Desktop polish: slightly bigger paddings */
 @media (min-width: 992px){
   .card{ padding-bottom: 2px; }
+}
+
+
+/* -------------------------------------------------
+   Extra "Kindergarten" vibes (cute but legible)
+-------------------------------------------------- */
+body {
+  background-image:
+    radial-gradient(1200px 600px at 15% 0%, rgba(255, 177, 211, .45), rgba(255,255,255,0) 60%),
+    radial-gradient(900px 500px at 85% 15%, rgba(255, 226, 241, .70), rgba(255,255,255,0) 55%),
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27120%27%20height%3D%27120%27%20viewBox%3D%270%200%20120%20120%27%3E%0A%3Crect%20width%3D%27120%27%20height%3D%27120%27%20fill%3D%27none%27/%3E%0A%3Cg%20opacity%3D%270.55%27%3E%0A%20%20%3Cpath%20d%3D%27M25%2034c0-6%205-11%2011-11%204%200%207%202%209%205%202-3%205-5%209-5%206%200%2011%205%2011%2011%200%2012-20%2022-20%2022S25%2046%2025%2034z%27%20fill%3D%27%23ff7bb5%27/%3E%0A%20%20%3Ccircle%20cx%3D%2788%27%20cy%3D%2726%27%20r%3D%276%27%20fill%3D%27%23ffd1e5%27/%3E%0A%20%20%3Cpath%20d%3D%27M88%2046l3%207%208%20.6-6%205%202%208-7-4-7%204%202-8-6-5%208-.6z%27%20fill%3D%27%23ffb3d3%27/%3E%0A%20%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2786%27%20r%3D%275%27%20fill%3D%27%23ffe3f1%27/%3E%0A%20%20%3Cpath%20d%3D%27M78%2082c0-5%204-9%209-9%203%200%206%202%207%204%202-2%204-4%207-4%205%200%209%204%209%209%200%2010-16%2018-16%2018S78%2092%2078%2082z%27%20fill%3D%27%23ff99c8%27/%3E%0A%3C/g%3E%0A%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-size: auto, auto, 220px 220px;
+  background-attachment: fixed;
+}
+
+.navbar {
+  border-bottom: 2px solid rgba(255, 117, 173, .25);
+}
+
+.navbar-brand {
+  letter-spacing: .3px;
+}
+
+.kinder-title {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.kinder-title .spark {
+  display:inline-block;
+  transform: translateY(-1px);
+}
+
+.card, .modal-content, .toast {
+  border-width: 2px;
+}
+
+.btn {
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+.btn-primary {
+  box-shadow: 0 10px 22px rgba(255, 79, 152, .18);
+}
+
+.btn-primary:active {
+  transform: translateY(1px) scale(.99);
+}
+
+.badge, .pill, .chip {
+  border-radius: 999px !important;
+  font-weight: 800;
+}
+
+.form-control, .form-select {
+  border-width: 2px;
+}
+
+.form-control:focus, .form-select:focus {
+  box-shadow: 0 0 0 .25rem rgba(255, 79, 152, .18) !important;
+}
+
+.modal-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-header::after {
+  content: "✨";
+  position: absolute;
+  right: 16px;
+  top: 10px;
+  font-size: 20px;
+  opacity: .85;
+}
+
+.modal-title {
+  font-weight: 900;
+}
+
+.alert {
+  border-width: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-primary {
+    transition: transform .08s ease, box-shadow .2s ease;
+  }
+  .kinder-wiggle {
+    animation: kinderWiggle 2.8s ease-in-out infinite;
+  }
+  @keyframes kinderWiggle {
+    0%,100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
 }
