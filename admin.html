@@ -302,8 +302,7 @@ async function closeEvent(eventId){
   if (!adminToken) return toast("請輸入管理密碼", "error");
   const ok = await confirmDialog({
     title: "確認結單",
-    message: "確定要結單嗎？
-結單後前台仍可查看名單，但不能再更新報名。",
+    message: "確定要結單嗎？\n結單後前台仍可查看名單，但不能再更新報名。",
     confirmText: "確定結單",
     cancelText: "返回",
     variant: "danger",

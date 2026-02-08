@@ -308,8 +308,7 @@ if (options.successTitle || options.successMessage){
   const sic = iconMap[options.successIcon] || iconMap.success;
   if (bodyEl){
     const sTitle = escapeHtml(String(options.successTitle || sic.label));
-    const sMsgHtml = escapeHtml(String(options.successMessage || "")).replace(/
-/g, "<br>");
+    const sMsgHtml = escapeHtml(String(options.successMessage || "")).replace(/\n/g, "<br>");
     bodyEl.innerHTML = `
       <div class="confirm-layout">
         <div class="confirm-icon confirm-icon-success" aria-hidden="true">${sic.emoji}</div>
