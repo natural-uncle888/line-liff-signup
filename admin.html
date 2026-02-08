@@ -42,6 +42,111 @@
               <button class="btn btn-sm btn-outline-secondary" id="btnLoadList">重新載入</button>
             </div>
             <div class="row g-2 mt-2">
+              <div class="col-md-8">
+                <select class="form-select" id="eventPicker">
+                  <option value="">（選擇要編輯的活動）</option>
+                </select>
+              </div>
+              <div class="col-md-4 d-grid">
+                <button class="btn btn-outline-primary" id="btnLoadEvent">載入活動</button>
+              </div>
+            </div>
+            <div class="small-muted mt-2">目前編輯中：<span class="mono" id="editingEventId">（新活動）</span></div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">活動名稱</label>
+            <input class="form-control" id="title" placeholder="例如：苗栗採草莓一日遊"/>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">活動簡述（可空）</label>
+            <textarea class="form-control" id="description" rows="2" placeholder="例如：可選段落參加，方便家長帶孩子"></textarea>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between">
+            <h6 class="mb-2">行程清單</h6>
+            <button class="btn btn-sm btn-outline-primary" id="btnAddSeg">＋ 新增一段</button>
+          </div>
+
+          <div id="segmentsEditor" class="vstack gap-2"></div>
+
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-primary" id="btnCreate">建立新活動</button>
+            <button class="btn btn-success" id="btnUpdate" disabled>更新活動內容</button>
+            <button class="btn btn-outline-secondary" id="btnSeed">快速帶入範例行程</button>
+            <button class="btn btn-outline-danger" id="btnNew">切回新活動（清空）</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-1">結單</h5>
+          <div class="small-muted mb-3">結單後前台仍可查看名單，但不能再更新報名</div>
+          <div class="mb-2">
+            <button class="btn btn-outline-secondary" id="btnReload">重新載入活動</button>
+          </div>
+          <div id="openEvents" class="vstack gap-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Confirm Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content confirm-modal">
+      <div class="modal-header border-0 pb-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-0" id="confirmModalBody"></div>
+      <div class="px-3 pb-0 d-none" id="confirmModalErrorWrap">
+        <div class="alert alert-danger py-2 mb-0 small" id="confirmModalError"></div>
+      </div>
+      <div class="modal-footer border-0 pt-2">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="confirmModalCancel">返回</button>
+        <button type="button" class="btn btn-danger" id="confirmModalOk">
+          <span class="btn-text">確定</span>
+          <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let segCounter = 0;
+let EDITING_EVENT_ID = "";
+
+function segTemplate(data={}){
+  segCounter += 1;
+  const date = data.date || "";
+  const endDate = data.endDate || "";
+  const startTime = data.startTime || "";
+  const endTime = data.endTime || "";
+  const location = data.location || "";
+  const highlights = data.highlights || "";
+  const segmentId = data.segmentId || "";
+  const isExisting = !!segmentId;
+
+  const wrap = document.createElement("div");
+  wrap.className = "card";
+  wrap.innerHTML = `
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="fw-semibold">行程 #${segCounter} ${segmentId ? `<span class="badge text-bg-light border mono ms-2">${escapeHtml(segmentId)}</span>` : ``}</div>
+        <button type="button" class="btn btn-sm btn-outline-danger" ${isExisting ? "disabled" : ""}>刪除</button>
+      </div>
+      <input type="hidden" data-field="segmentId" value="${escapeHtml(segmentId)}">
+      <div class="row g-2 mt-2">
         <div class="col-md-6">
           <label class="form-label">開始日期</label>
           <input class="form-control" type="date" data-field="date" value="${escapeHtml(date)}">
@@ -51,6 +156,7 @@
           <input class="form-control" type="date" data-field="endDate" value="${escapeHtml(endDate)}">
         </div>
       </div>
+
       <div class="row g-2 mt-2">
         <div class="col-md-6">
           <label class="form-label">開始</label>
@@ -61,8 +167,9 @@
           <input class="form-control" type="time" data-field="endTime" value="${escapeHtml(endTime)}">
         </div>
       </div>
+
       <div class="row g-2 mt-2">
-<div class="col-md-12">
+        <div class="col-md-12">
           <label class="form-label">地點</label>
           <input class="form-control" data-field="location" value="${escapeHtml(location)}" placeholder="例如：舞夜天高架草莓園">
         </div>
