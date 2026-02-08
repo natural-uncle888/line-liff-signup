@@ -29,9 +29,12 @@
           <div class="small-muted mb-3">先填活動主檔，再一段一段新增行程清單</div>
 
           <div class="mb-3">
-            <label class="form-label">管理密碼（ADMIN TOKEN）</label>
-            <input class="form-control" id="adminToken" placeholder="請輸入你在 Code.gs 設定的 ADMIN_TOKEN"/>
-          </div>
+  <label class="form-label mb-1">管理密碼（ADMIN TOKEN）</label>
+  <div class="form-text mb-1" style="color:#e96fa3; line-height:1.2;">
+    💡 預設密碼為：<strong>12345</strong>
+  </div>
+  <input type="password" id="adminToken" class="form-control mt-1">
+</div>
 
           <div class="kpi p-3 mb-3">
             <div class="d-flex align-items-center justify-content-between">
@@ -64,8 +67,8 @@
             <textarea class="form-control" id="description" rows="2" placeholder="例如：可選段落參加，方便家長帶孩子"></textarea>
           </div>
 
-          <div class="d-flex align-items-center justify-content-between">
-            <h6 class="mb-2">行程清單</h6>
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="mb-0">行程清單</h6>
             <button class="btn btn-sm btn-outline-primary" id="btnAddSeg">＋ 新增一段</button>
           </div>
 
@@ -413,17 +416,26 @@ async function runAdminAction(primaryBtnId, loadingText, fn){
   }
 }
 
-document.getElementById("btnAddSeg").onclick = ()=> addSeg();
-document.getElementById("btnCreate").onclick = ()=> runAdminAction("btnCreate","建立新活動中…", createEvent);
-document.getElementById("btnUpdate").onclick = ()=> runAdminAction("btnUpdate","更新活動內容中…", updateEvent);
-document.getElementById("btnNew").onclick = resetToNewEvent;
-document.getElementById("btnReload").onclick = ()=> loadOpenEvents().catch(e=>toast(e.message,"error"));
-document.getElementById("btnSeed").onclick = seedExample;
-document.getElementById("btnLoadList").onclick = ()=> loadEventsForPicker().catch(e=>toast(e.message,"error"));
-document.getElementById("btnLoadEvent").onclick = ()=> runAdminAction("btnLoadEvent","載入活動中…", loadEventIntoEditor);
-addSeg();
-loadOpenEvents();
-loadEventsForPicker();
+document.addEventListener("DOMContentLoaded", () => {
+  const bind = (id, handler) => {
+    const el = document.getElementById(id);
+    if (el) el.onclick = handler;
+  };
+
+  bind("btnAddSeg", () => addSeg());
+  bind("btnCreate", () => runAdminAction("btnCreate","建立新活動中…", createEvent));
+  bind("btnUpdate", () => runAdminAction("btnUpdate","更新活動內容中…", updateEvent));
+  bind("btnNew", () => resetToNewEvent());
+  bind("btnReload", () => loadOpenEvents().catch(e=>toast(e.message,"error")));
+  bind("btnSeed", () => seedExample());
+  bind("btnLoadList", () => loadEventsForPicker().catch(e=>toast(e.message,"error")));
+  bind("btnLoadEvent", () => runAdminAction("btnLoadEvent","載入活動中…", loadEventIntoEditor));
+
+  // Initial render / data load
+  addSeg();
+  loadOpenEvents();
+  loadEventsForPicker();
+});
 </script>
 
   <div id="confetti" class="confetti-container" aria-hidden="true"></div>
