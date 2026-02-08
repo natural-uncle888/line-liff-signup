@@ -483,3 +483,13 @@ h1::after, h2::after{
   background: linear-gradient(135deg, rgba(255, 79, 152,.18), rgba(207, 233, 255,.55));
 }
 .modal-title::before{ content:"🧸 "; }
+.photo-link {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+  background-image: url("/images/kids-group.jpg");
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+}
