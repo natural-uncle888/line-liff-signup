@@ -309,6 +309,9 @@ async function closeEvent(eventId){
     variant: "danger",
     icon: "warning",
     busyText: "結單中…",
+    successTitle: "結單完成",
+    successMessage: "已完成結單，視窗將自動關閉。",
+    autoCloseMs: 900,
     onConfirm: async () => {
       await apiPost({ action:"closeEvent", adminToken, eventId });
     }
