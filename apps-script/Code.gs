@@ -11,7 +11,7 @@
 
 // ====== 請設定 ======
 var SPREADSHEET_ID = '1_hklG4_dEr42TDDZSWOCTSsCD-66OCnpwXcwftNh0Uo';
-var ADMIN_TOKEN = '12345';
+var ADMIN_TOKEN = 'aa278071jesnkimo';
 // ===================
 
 var SHEETS = {
@@ -58,12 +58,33 @@ function doGet(e) {
   }
 }
 
+
+function parsePost_(e){
+  // Supports both JSON and application/x-www-form-urlencoded
+  var body = {};
+  try{
+    if (e && e.postData && e.postData.contents){
+      var ct = (e.postData.type || '').toLowerCase();
+      if (ct.indexOf('application/json') >= 0){
+        body = JSON.parse(e.postData.contents);
+      }else{
+        // GAS automatically parses form fields into e.parameter
+        body = e.parameter || {};
+      }
+    }else{
+      body = (e && e.parameter) ? e.parameter : {};
+    }
+  }catch(err){
+    // fallback to e.parameter
+    body = (e && e.parameter) ? e.parameter : {};
+  }
+  // normalize number-like fields if present
+  return body || {};
+}
+
 function doPost(e) {
   try {
-    var body = {};
-    if (e && e.postData && e.postData.contents) {
-      body = JSON.parse(e.postData.contents);
-    }
+    var body = parsePost_(e);
     var action = body.action || '';
     if (!action) return jsonOut({ ok:false, error:'Missing action' });
 
@@ -99,6 +120,25 @@ function doPost(e) {
       if (ev.status !== 'OPEN') return jsonOut({ ok:false, error:'Event is CLOSED' });
 
       upsertRegistration_(eventId3, userId, displayName, segments2);
+      return jsonOut({ ok:true });
+    }
+
+
+    if (action === 'cancelRegistration') {
+      var eventId4 = (body.eventId || '').trim();
+      var userId2 = (body.userId || '').trim();
+      if (!eventId4 || !userId2) return jsonOut({ ok:false, error:'Missing eventId/userId' });
+      // Optional: prevent cancel when event closed? Usually allow cancel even after close if you want.
+      deleteRegistration_(eventId4, userId2);
+      return jsonOut({ ok:true });
+    }
+
+    if (action === 'deleteRegistration') {
+      requireAdmin_(body.adminToken);
+      var eventId5 = (body.eventId || '').trim();
+      var targetUserId = (body.userId || '').trim();
+      if (!eventId5 || !targetUserId) return jsonOut({ ok:false, error:'Missing eventId/userId' });
+      deleteRegistration_(eventId5, targetUserId);
       return jsonOut({ ok:true });
     }
 
@@ -331,6 +371,23 @@ function upsertRegistration_(eventId, userId, displayName, segmentsArr) {
   }
   sh.appendRow([eventId, userId, displayName, segStr, updatedAt]);
 }
+
+
+function deleteRegistration_(eventId, userId){
+  var ss = ss_();
+  var sh = ss.getSheetByName(SHEETS.REGS);
+  var values = sh.getDataRange().getValues();
+  var headers = values[0];
+  var idxEventId = headers.indexOf('eventId');
+  var idxUserId = headers.indexOf('userId');
+  // delete all matching rows (usually 1)
+  for (var r=values.length-1; r>=1; r--){
+    if (values[r][idxEventId] === eventId && values[r][idxUserId] === userId){
+      sh.deleteRow(r+1);
+    }
+  }
+}
+
 
 function parseSegments_(segStr) {
   if (!segStr) return [];
