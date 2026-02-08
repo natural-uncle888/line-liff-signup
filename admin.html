@@ -359,11 +359,14 @@ async function runAdminAction(primaryBtnId, loadingText, fn){
 
     others.forEach(b => {
       const prev = b.dataset._lockPrevDisabled;
+      // If the action itself changed a button's disabled state (e.g. loading an event enables
+      // "更新活動內容"), respect the new state. Only restore the previous state if the button
+      // is still disabled from our lock.
       if (prev != null){
-        b.disabled = (prev === "1");
+        if (b.disabled === true) b.disabled = (prev === "1");
         delete b.dataset._lockPrevDisabled;
       } else {
-        b.disabled = false;
+        if (b.disabled === true) b.disabled = false;
       }
       b.classList.remove("is-locked");
     });
