@@ -178,8 +178,12 @@ body{
 
 /* Admin: widen date/time inputs on desktop to avoid truncation (Taiwan locale shows 上午/下午) */
 @media (min-width: 768px){
+  }
+
+
+@media (min-width: 992px){
   #segmentsEditor input[type="time"],
   #segmentsEditor input[type="date"]{
-    min-width: 170px;
+    min-width: 180px;
   }
 }
