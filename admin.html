@@ -96,32 +96,8 @@
   </div>
 </div>
 
-
-<!-- Confirm Modal -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content confirm-modal">
-      <div class="modal-header border-0 pb-0">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body pt-0" id="confirmModalBody"></div>
-      <div class="px-3 pb-0 d-none" id="confirmModalErrorWrap">
-        <div class="alert alert-danger py-2 mb-0 small" id="confirmModalError"></div>
-      </div>
-      <div class="modal-footer border-0 pt-2">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="confirmModalCancel">返回</button>
-        <button type="button" class="btn btn-danger" id="confirmModalOk">
-          <span class="btn-text">確定</span>
-          <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="./config.js"></script>
 <script src="./app.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 let segCounter = 0;
 let EDITING_EVENT_ID = "";
@@ -300,22 +276,8 @@ async function loadOpenEvents(){
 async function closeEvent(eventId){
   const adminToken = document.getElementById("adminToken").value.trim();
   if (!adminToken) return toast("請輸入管理密碼", "error");
-  const ok = await confirmDialog({
-    title: "確認結單",
-    message: "確定要結單嗎？\n結單後前台仍可查看名單，但不能再更新報名。",
-    confirmText: "確定結單",
-    cancelText: "返回",
-    variant: "danger",
-    icon: "warning",
-    busyText: "結單中…",
-    successTitle: "結單完成",
-    successMessage: "已完成結單，視窗將自動關閉。",
-    autoCloseMs: 900,
-    onConfirm: async () => {
-      await apiPost({ action:"closeEvent", adminToken, eventId });
-    }
-  });
-  if (!ok) return;
+  if (!confirm("確定要結單？結單後前台不能再更新報名")) return;
+  await apiPost({ action:"closeEvent", adminToken, eventId });
   toast("已結單", "success");
   await loadOpenEvents();
 }

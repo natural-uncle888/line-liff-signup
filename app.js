@@ -199,12 +199,7 @@ function confirmDialog(opts){
     variant: "primary",   // bootstrap variant
     icon: "question",     // question | trash | warning
     busyText: null,       // e.g. "處理中…"
-    onConfirm: null,      // optional async function
-    // Optional: show success state then auto-close
-    successTitle: null,
-    successMessage: null,
-    successIcon: "success",
-    autoCloseMs: 900
+    onConfirm: null       // optional async function
   }, opts || {});
 
   const el = document.getElementById("confirmModal");
@@ -227,8 +222,7 @@ function confirmDialog(opts){
   const iconMap = {
     question: { emoji: "❓", label: "確認" },
     warning:  { emoji: "⚠️", label: "注意" },
-    trash:    { emoji: "🗑️", label: "刪除" },
-    success:  { emoji: "✅", label: "完成" }
+    trash:    { emoji: "🗑️", label: "刪除" }
   };
   const ic = iconMap[options.icon] || iconMap.question;
 
@@ -286,7 +280,6 @@ function confirmDialog(opts){
 
   return new Promise(resolve=>{
     let resolved = false;
-    let successClosing = false;
 
     const finish = (val)=>{
       if (resolved) return;
@@ -301,43 +294,8 @@ function confirmDialog(opts){
         try{
           setBusy(true);
           await options.onConfirm();
-
-// If configured, show a success state before auto-closing
-if (options.successTitle || options.successMessage){
-  successClosing = true;
-  const sic = iconMap[options.successIcon] || iconMap.success;
-  if (bodyEl){
-    const sTitle = escapeHtml(String(options.successTitle || sic.label));
-    const sMsgHtml = escapeHtml(String(options.successMessage || "")).replace(/\n/g, "<br>");
-    bodyEl.innerHTML = `
-      <div class="confirm-layout">
-        <div class="confirm-icon confirm-icon-success" aria-hidden="true">${sic.emoji}</div>
-        <div class="confirm-copy">
-          <div class="confirm-title">${sTitle}</div>
-          <div class="confirm-message">${sMsgHtml}</div>
-        </div>
-      </div>
-    `;
-  }
-  // lock buttons, hide cancel, and stop spinner
-  setBusy(true);
-  if (cancelBtn) cancelBtn.classList.add("d-none");
-  if (okBtn){
-    const spinner = okBtn.querySelector(".spinner-border");
-    if (spinner) spinner.classList.add("d-none");
-    const t = okBtn.querySelector(".btn-text");
-    if (t) t.textContent = "完成";
-    okBtn.disabled = true;
-    okBtn.className = "btn btn-success";
-  }
-  setTimeout(()=>{
-    modal.hide();
-    finish(true);
-  }, Number(options.autoCloseMs || 900));
-}else{
-  modal.hide();
-  finish(true);
-}
+          modal.hide();
+          finish(true);
         }catch(e){
           // keep modal open; show inline error; allow retry
           setBusy(false);
@@ -356,8 +314,7 @@ if (options.successTitle || options.successMessage){
     };
 
     const onHidden = ()=>{
-      // user closed via X or programmatic hide
-      if (successClosing) return;
+      // user closed via X
       finish(false);
     };
 
