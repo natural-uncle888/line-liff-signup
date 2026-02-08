@@ -128,7 +128,23 @@ function doPost(e) {
       return jsonOut({ ok:true, eventId:eventId });
     }
 
-    if (action === 'closeEvent') {
+    
+    if (action === 'updateEvent') {
+      requireAdmin_(body.adminToken);
+      var eventIdU = (body.eventId || '').trim();
+      if (!eventIdU) return jsonOut({ ok:false, error:'Missing eventId' });
+
+      var titleU = (body.title || '').trim();
+      var descriptionU = (body.description || '').trim();
+      var segmentsU = normalizeSegments_(body.segments);
+      if (!titleU) return jsonOut({ ok:false, error:'Missing title' });
+      if (!segmentsU.length) return jsonOut({ ok:false, error:'At least 1 segment required' });
+
+      updateEvent_(eventIdU, titleU, descriptionU, segmentsU);
+      return jsonOut({ ok:true });
+    }
+
+if (action === 'closeEvent') {
       requireAdmin_(body.adminToken);
       var eventId2 = (body.eventId || '').trim();
       if (!eventId2) return jsonOut({ ok:false, error:'Missing eventId' });
@@ -200,7 +216,7 @@ function ss_() {
   }
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   ensureSheet_(ss, SHEETS.EVENTS, ['eventId','title','description','status','createdAt','closedAt']);
-  ensureSheet_(ss, SHEETS.SEGMENTS, ['eventId','segmentId','date','startTime','endTime','location','highlights','order']);
+  ensureSheet_(ss, SHEETS.SEGMENTS, ['eventId','segmentId','date','endDate','startTime','endTime','location','highlights','order']);
   ensureSheet_(ss, SHEETS.REGS, ['eventId','userId','displayName','adults','kids','childName','segments','updatedAt']);
   return ss;
 }
@@ -262,6 +278,7 @@ function createEvent_(title, description, segments) {
       eventId,
       segmentId,
       s.date || '',
+      s.endDate || '',
       s.startTime || '',
       s.endTime || '',
       s.location || '',
@@ -272,6 +289,76 @@ function createEvent_(title, description, segments) {
 
   return eventId;
 }
+
+
+function updateEvent_(eventId, title, description, segments) {
+  var ss = ss_();
+  var shE = ss.getSheetByName(SHEETS.EVENTS);
+  var values = shE.getDataRange().getValues();
+  var headers = values[0];
+
+  var idxEventId = headers.indexOf('eventId');
+  var idxTitle = headers.indexOf('title');
+  var idxDesc = headers.indexOf('description');
+
+  var rowNum = -1;
+  for (var r=1; r<values.length; r++){
+    if (values[r][idxEventId] === eventId){ rowNum = r+1; break; }
+  }
+  if (rowNum === -1) throw new Error('Event not found');
+
+  if (idxTitle >= 0) shE.getRange(rowNum, idxTitle+1).setValue(title);
+  if (idxDesc >= 0) shE.getRange(rowNum, idxDesc+1).setValue(description);
+
+  replaceSegments_(eventId, segments);
+}
+
+function replaceSegments_(eventId, segments) {
+  var ss = ss_();
+  var shS = ss.getSheetByName(SHEETS.SEGMENTS);
+  var lastCol = shS.getLastColumn();
+  var headers = shS.getRange(1, 1, 1, lastCol).getValues()[0];
+
+  var idxEventId = headers.indexOf('eventId');
+  if (idxEventId < 0) throw new Error('Segments sheet missing eventId header');
+
+  // Delete existing segments for this event (bottom-up)
+  for (var r = shS.getLastRow(); r >= 2; r--) {
+    var v = shS.getRange(r, idxEventId + 1).getValue();
+    if (v === eventId) shS.deleteRow(r);
+  }
+
+  // Append new segments aligned by header names
+  for (var i=0; i<segments.length; i++){
+    var s = segments[i] || {};
+    var segId = String(s.segmentId || '').trim();
+    if (!segId) segId = 'SEG-' + ('000' + (i+1)).slice(-4);
+
+    var row = new Array(headers.length);
+    for (var c=0; c<headers.length; c++){
+      row[c] = ''; // default
+    }
+    setByHeader_(headers, row, 'eventId', eventId);
+    setByHeader_(headers, row, 'segmentId', segId);
+    setByHeader_(headers, row, 'date', s.date || '');
+    setByHeader_(headers, row, 'endDate', s.endDate || '');
+    setByHeader_(headers, row, 'startTime', s.startTime || '');
+    setByHeader_(headers, row, 'endTime', s.endTime || '');
+    setByHeader_(headers, row, 'location', s.location || '');
+    setByHeader_(headers, row, 'highlights', s.highlights || '');
+    setByHeader_(headers, row, 'order', s.order || (i+1));
+
+    shS.appendRow(row);
+  }
+}
+
+function setByHeader_(headers, row, key, value){
+  var idx = headers.indexOf(key);
+  if (idx >= 0) row[idx] = value;
+}
+
+
+
 
 function closeEvent_(eventId) {
   var ss = ss_();
