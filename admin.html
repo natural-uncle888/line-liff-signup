@@ -333,13 +333,21 @@ async function runAdminAction(primaryBtnId, loadingText, fn){
   const bUpdate = document.getElementById("btnUpdate");
   const bLoad = document.getElementById("btnLoadEvent");
 
+  const others = [bCreate, bUpdate, bLoad].filter(b => b && b.id !== primaryBtnId);
+
   setActionUI(true, loadingText);
 
-  // lock main actions to prevent double submissions
+  // Only show spinner on the button user clicked.
   setBtnLoading(primary, true, loadingText);
-  if (primaryBtnId !== "btnCreate") setBtnLoading(bCreate, true, "處理中…");
-  if (primaryBtnId !== "btnUpdate") setBtnLoading(bUpdate, true, "處理中…");
-  if (primaryBtnId !== "btnLoadEvent") setBtnLoading(bLoad, true, "處理中…");
+
+  // Disable the other main action buttons (no spinner), to prevent double submissions.
+  others.forEach(b => {
+    if (b.dataset._lockPrevDisabled == null) {
+      b.dataset._lockPrevDisabled = b.disabled ? "1" : "0";
+    }
+    b.disabled = true;
+    b.classList.add("is-locked");
+  });
 
   try{
     await fn();
@@ -348,9 +356,17 @@ async function runAdminAction(primaryBtnId, loadingText, fn){
   }finally{
     setActionUI(false, "");
     setBtnLoading(primary, false);
-    if (primaryBtnId !== "btnCreate") setBtnLoading(bCreate, false);
-    if (primaryBtnId !== "btnUpdate") setBtnLoading(bUpdate, false);
-    if (primaryBtnId !== "btnLoadEvent") setBtnLoading(bLoad, false);
+
+    others.forEach(b => {
+      const prev = b.dataset._lockPrevDisabled;
+      if (prev != null){
+        b.disabled = (prev === "1");
+        delete b.dataset._lockPrevDisabled;
+      } else {
+        b.disabled = false;
+      }
+      b.classList.remove("is-locked");
+    });
   }
 }
 
